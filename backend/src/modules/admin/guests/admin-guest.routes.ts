@@ -1,8 +1,8 @@
 import type { FastifyPluginAsync } from 'fastify';
 
 import { requireAdmin } from '../admin-auth.js';
-import { createGuestBodySchema, guestIdParamsSchema, updateGuestBodySchema } from './admin-guest.schemas.js';
-import { createAdminGuest, updateAdminGuest } from './admin-guest.service.js';
+import { createGuestBodySchema, guestIdParamsSchema, setGuestEventsBodySchema, updateGuestBodySchema } from './admin-guest.schemas.js';
+import { createAdminGuest, setAdminGuestEvents, updateAdminGuest } from './admin-guest.service.js';
 
 export const adminGuestRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', requireAdmin);
@@ -33,6 +33,20 @@ export const adminGuestRoutes: FastifyPluginAsync = async (app) => {
     } catch (error) {
       request.log.warn({ err: error }, 'Admin guest update failed');
       return reply.status(409).send({ error: 'GUEST_UPDATE_FAILED', message: 'Não foi possível atualizar o convidado.' });
+    }
+  });
+
+  app.put('/:guestId/events', async (request, reply) => {
+    const params = guestIdParamsSchema.safeParse(request.params);
+    const body = setGuestEventsBodySchema.safeParse(request.body);
+    if (!params.success || !body.success) {
+      return reply.status(400).send({ error: 'INVALID_GUEST_EVENTS', message: 'Eventos do convidado inválidos.' });
+    }
+    try {
+      return await setAdminGuestEvents(request.adminAccessToken, params.data.guestId, body.data);
+    } catch (error) {
+      request.log.warn({ err: error }, 'Admin guest events update failed');
+      return reply.status(409).send({ error: 'GUEST_EVENTS_UPDATE_FAILED', message: 'Não foi possível atualizar os eventos do convidado.' });
     }
   });
 };

@@ -46,7 +46,7 @@ O SQL Editor opera com privilégios elevados e não prova o comportamento real d
 - comportamento de RLS por chamadas reais;
 - upload e acesso ao Storage pela aplicação.
 
-## Próxima fase — Estágio 2
+## Estágio 2 — Backend/API
 
 Desenvolvimento do backend/API:
 1. definir stack e estrutura;
@@ -60,7 +60,7 @@ Desenvolvimento do backend/API:
 9. testes automatizados;
 10. testes reais de RLS/autorização.
 
-## Atualização — fechamento do backend MVP v1
+## Encerramento do Estágio 2 — Backend MVP v1
 
 O backend/API do MVP foi implementado e validado em ambiente de aplicação, incluindo autenticação administrativa, RLS, acesso público por token, RSVP, eventos, convites, convidados, presentes, reservas, categorias, conteúdo público, galeria e Storage.
 
@@ -72,4 +72,40 @@ Decisões consolidadas para o MVP v1:
 - override administrativo de RSVP após o prazo: possível feature futura, não obrigatória no MVP atual;
 - pagamentos permanecem fora do MVP.
 
-Com os contratos principais do backend definidos e validados, o projeto está apto a iniciar o desenvolvimento do frontend.
+Com os contratos principais do backend definidos e validados, o **Estágio 2 está oficialmente encerrado**.
+
+## Situação geral do projeto
+
+| Estágio | Escopo | Situação |
+|---|---|---|
+| Estágio 1 | Definição do produto, requisitos, regras de negócio, modelo de dados, Supabase e segurança inicial | **Encerrado** |
+| Estágio 2 | Backend/API, autenticação, endpoints, RPCs, RLS, Storage e testes | **Encerrado** |
+| Estágio 3 | Frontend público e administrativo, identidade visual e integração com a API | **Próximo** |
+| Estágio 4 | Integração, homologação, ajustes finais, deploy e preparação para uso real | **Futuro** |
+
+## Próximo estágio — Estágio 3
+
+O Estágio 3 será dedicado ao desenvolvimento do frontend do **Love, Lopes & Caponi**.
+
+A sequência prevista é:
+1. definir a stack e a estrutura do frontend;
+2. consolidar identidade visual, componentes-base e responsividade;
+3. desenvolver a experiência pública e a navegação por convite;
+4. implementar páginas de eventos, informações, história e galeria;
+5. integrar RSVP individual;
+6. integrar catálogo e reserva de presentes;
+7. desenvolver autenticação e painel administrativo;
+8. integrar gestão de eventos, convites, convidados, presentes, reservas, conteúdo e galeria;
+9. implementar compartilhamento manual de convites/links;
+10. validar os fluxos completos em desktop e mobile.
+
+O frontend deverá consumir os contratos existentes da API. Alterações no backend durante o Estágio 3 devem ocorrer apenas quando uma necessidade concreta de integração ou correção for identificada, evitando expansão desnecessária do escopo.
+
+## Features futuras registradas
+
+Não são pendências do MVP atual:
+- override administrativo de RSVP após o prazo;
+- pagamentos integrados;
+- demais evoluções que venham a ser validadas durante o desenvolvimento ou uso do produto.
+
+**Marco atual:** Estágios 1 e 2 concluídos; projeto pronto para iniciar o Estágio 3 — Frontend.

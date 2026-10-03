@@ -66,10 +66,10 @@ A reserva do presente é executada por função no banco com controle transacion
 ## Storage
 
 Buckets definidos:
-- `wedding-gallery` — imagens da galeria, limite de 10 MB;
+- `wedding-gallery` — imagens da galeria, limite de 5 MB;
 - `gift-images` — imagens dos presentes, limite de 5 MB.
 
-Tipos permitidos: JPEG, PNG, WebP e AVIF.
+Tipos suportados pela aplicação: JPEG, PNG e WebP.
 
 Os buckets servem arquivos publicamente, enquanto upload, alteração, exclusão e operações administrativas de objetos ficam restritos a administradores ativos.
 

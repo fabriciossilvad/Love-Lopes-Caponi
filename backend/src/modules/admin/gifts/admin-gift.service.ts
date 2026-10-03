@@ -45,22 +45,23 @@ export async function createAdminGift(accessToken: string, input: CreateGiftBody
 }
 
 export async function updateAdminGift(accessToken: string, giftId: string, input: UpdateGiftBody) {
-  const supabase = client(accessToken);
+  const { data, error } = await client(accessToken).rpc('admin_update_gift', {
+    p_gift_id: giftId,
+    p_event_id: input.eventId ?? null,
+    p_category_id: input.categoryId ?? null,
+    p_set_category_id: input.categoryId !== undefined,
+    p_name: input.name ?? null,
+    p_description: input.description ?? null,
+    p_set_description: input.description !== undefined,
+    p_image_path: input.imagePath ?? null,
+    p_set_image_path: input.imagePath !== undefined,
+    p_estimated_value: input.estimatedValue ?? null,
+    p_set_estimated_value: input.estimatedValue !== undefined,
+    p_quantity: input.quantity ?? null,
+    p_status: input.status ?? null,
+    p_display_order: input.displayOrder ?? null,
+  });
 
-  if (input.quantity !== undefined) {
-    const { count, error: countError } = await supabase
-      .from('gift_reservations')
-      .select('id', { count: 'exact', head: true })
-      .eq('gift_id', giftId)
-      .eq('status', 'ACTIVE');
-    if (countError) throw countError;
-    if ((count ?? 0) > input.quantity) {
-      throw new Error('Gift quantity cannot be lower than active reservations');
-    }
-  }
-
-  const { data, error } = await supabase
-    .from('gifts').update(payload(input)).eq('id', giftId).select(fields).maybeSingle();
   if (error) throw error;
   return data;
 }

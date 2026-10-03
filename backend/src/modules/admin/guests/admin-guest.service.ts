@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 import { getEnv } from '../../../config/env.js';
-import type { CreateGuestBody, UpdateGuestBody } from './admin-guest.schemas.js';
+import type { CreateGuestBody, SetGuestEventsBody, UpdateGuestBody } from './admin-guest.schemas.js';
 
 function client(accessToken: string) {
   const env = getEnv();
@@ -41,6 +41,18 @@ export async function updateAdminGuest(accessToken: string, guestId: string, inp
     .eq('id', guestId)
     .select('id, invitation_id, name, phone, email, notes, status, created_at, updated_at')
     .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function setAdminGuestEvents(accessToken: string, guestId: string, input: SetGuestEventsBody) {
+  const uniqueEventIds = [...new Set(input.eventIds)];
+
+  const { data, error } = await client(accessToken).rpc('admin_set_guest_events', {
+    p_guest_id: guestId,
+    p_event_ids: uniqueEventIds,
+  });
+
   if (error) throw error;
   return data;
 }

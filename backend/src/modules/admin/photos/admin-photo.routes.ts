@@ -17,17 +17,23 @@ export const adminPhotoRoutes: FastifyPluginAsync = async (app) => {
 
   app.post('/', async (request, reply) => {
     try {
-      const part = await request.file();
-      if (!part) return reply.status(400).send({ error: 'PHOTO_REQUIRED', message: 'Envie uma imagem.' });
-      if (!isAllowedPhotoType(part.mimetype)) {
-        part.file.resume();
-        return reply.status(415).send({ error: 'INVALID_PHOTO_TYPE', message: 'Use JPEG, PNG ou WebP.' });
+      const fieldsRaw: Record<string, string> = {};
+      let file: { buffer: Buffer; mimetype: string } | undefined;
+
+      for await (const part of request.parts()) {
+        if (part.type === 'file') {
+          if (!isAllowedPhotoType(part.mimetype)) {
+            part.file.resume();
+            return reply.status(415).send({ error: 'INVALID_PHOTO_TYPE', message: 'Use JPEG, PNG ou WebP.' });
+          }
+          file = { buffer: await part.toBuffer(), mimetype: part.mimetype };
+        } else {
+          fieldsRaw[part.fieldname] = String(part.value);
+        }
       }
 
-      const fieldsRaw: Record<string, string> = {};
-      for (const [key, value] of Object.entries(part.fields)) {
-        if (value && typeof value === 'object' && 'value' in value) fieldsRaw[key] = String(value.value);
-      }
+      if (!file) return reply.status(400).send({ error: 'PHOTO_REQUIRED', message: 'Envie uma imagem.' });
+
       const fields = createPhotoFieldsSchema.safeParse({
         eventId: fieldsRaw.eventId || undefined,
         caption: fieldsRaw.caption || undefined,
@@ -36,11 +42,10 @@ export const adminPhotoRoutes: FastifyPluginAsync = async (app) => {
       });
       if (!fields.success) return reply.status(400).send({ error: 'INVALID_PHOTO', message: 'Dados da foto inválidos.' });
 
-      const buffer = await part.toBuffer();
-      if (!hasValidPhotoSignature(buffer, part.mimetype)) {
+      if (!hasValidPhotoSignature(file.buffer, file.mimetype)) {
         return reply.status(415).send({ error: 'INVALID_PHOTO_CONTENT', message: 'O conteúdo do arquivo não corresponde a uma imagem válida.' });
       }
-      return reply.status(201).send(await createAdminPhoto(request.adminAccessToken, buffer, part.mimetype, fields.data));
+      return reply.status(201).send(await createAdminPhoto(request.adminAccessToken, file.buffer, file.mimetype, fields.data));
     } catch (error) {
       request.log.warn({ err: error }, 'Admin photo creation failed');
       const code = (error as { code?: string }).code;

@@ -19,12 +19,13 @@ vi.mock('../src/modules/admin/guests/admin-guest.service.js', () => ({
 
 import { buildApp } from '../src/app.js';
 import { getAuthenticatedAdmin } from '../src/modules/admin/admin-auth.service.js';
-import { getAdminInvitationDetails } from '../src/modules/admin/invitations/admin-invitation.service.js';
+import { getAdminInvitationDetails, listAdminInvitations } from '../src/modules/admin/invitations/admin-invitation.service.js';
 import { setAdminGuestEvents } from '../src/modules/admin/guests/admin-guest.service.js';
 
 const apps: ReturnType<typeof buildApp>[] = [];
 const mockedAuth = vi.mocked(getAuthenticatedAdmin);
 const mockedDetails = vi.mocked(getAdminInvitationDetails);
+const mockedListInvitations = vi.mocked(listAdminInvitations);
 const mockedSetEvents = vi.mocked(setAdminGuestEvents);
 
 const admin = {
@@ -40,6 +41,33 @@ afterEach(async () => {
 });
 
 describe('admin invitation and guest API', () => {
+  it('filters invitations by event and pending RSVP', async () => {
+    mockedAuth.mockResolvedValue(admin);
+    mockedListInvitations.mockResolvedValue([{ id: 'ab0a62cf-defc-4f36-956a-4d9af682059d', display_name: 'Família Silva' }] as never);
+    const app = buildApp(); apps.push(app);
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/admin/invitations?eventId=2d475c27-636a-48b4-a3aa-520dcf5eed4b&rsvpStatus=PENDING',
+      headers: { authorization: 'Bearer test-admin-token' },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(mockedListInvitations).toHaveBeenCalledWith('test-admin-token', {
+      eventId: '2d475c27-636a-48b4-a3aa-520dcf5eed4b', rsvpStatus: 'PENDING',
+    });
+  });
+
+  it('rejects invalid invitation filters before service', async () => {
+    mockedAuth.mockResolvedValue(admin);
+    const app = buildApp(); apps.push(app);
+    const response = await app.inject({
+      method: 'GET', url: '/api/admin/invitations?rsvpStatus=INVALID',
+      headers: { authorization: 'Bearer test-admin-token' },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'INVALID_INVITATION_FILTER' });
+    expect(mockedListInvitations).not.toHaveBeenCalled();
+  });
+
   it('returns invitation details with guests and RSVP memberships', async () => {
     mockedAuth.mockResolvedValue(admin);
     mockedDetails.mockResolvedValue({

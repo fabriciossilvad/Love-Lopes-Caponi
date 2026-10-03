@@ -12,43 +12,20 @@ function client(accessToken: string) {
 }
 
 export async function createAdminGuest(accessToken: string, input: CreateGuestBody) {
-  const supabase = client(accessToken);
   const uniqueEventIds = [...new Set(input.eventIds)];
 
-  const { data: invitation, error: invitationError } = await supabase
-    .from('invitations').select('id').eq('id', input.invitationId).maybeSingle();
-  if (invitationError) throw invitationError;
-  if (!invitation) throw new Error('INVITATION_NOT_FOUND');
+  const { data, error } = await client(accessToken).rpc('admin_create_guest', {
+    p_invitation_id: input.invitationId,
+    p_name: input.name,
+    p_event_ids: uniqueEventIds,
+    p_phone: input.phone ?? null,
+    p_email: input.email ?? null,
+    p_notes: input.notes ?? null,
+    p_status: input.status,
+  });
 
-  const { data: events, error: eventsError } = await supabase
-    .from('events').select('id').in('id', uniqueEventIds);
-  if (eventsError) throw eventsError;
-  if ((events?.length ?? 0) !== uniqueEventIds.length) throw new Error('EVENT_NOT_FOUND');
-
-  const { data: guest, error: guestError } = await supabase
-    .from('guests')
-    .insert({
-      invitation_id: input.invitationId,
-      name: input.name,
-      phone: input.phone ?? null,
-      email: input.email ?? null,
-      notes: input.notes ?? null,
-      status: input.status,
-    })
-    .select('id, invitation_id, name, phone, email, notes, status, created_at, updated_at')
-    .single();
-  if (guestError) throw guestError;
-
-  const { error: membershipError } = await supabase.from('guest_events').insert(
-    uniqueEventIds.map((eventId) => ({ guest_id: guest.id, event_id: eventId })),
-  );
-
-  if (membershipError) {
-    await supabase.from('guests').delete().eq('id', guest.id);
-    throw membershipError;
-  }
-
-  return { ...guest, event_ids: uniqueEventIds };
+  if (error) throw error;
+  return data;
 }
 
 export async function updateAdminGuest(accessToken: string, guestId: string, input: UpdateGuestBody) {

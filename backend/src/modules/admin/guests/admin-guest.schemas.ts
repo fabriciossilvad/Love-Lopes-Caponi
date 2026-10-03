@@ -22,5 +22,10 @@ export const updateGuestBodySchema = z.object({
   message: 'Informe ao menos um campo para atualização.',
 });
 
+export const setGuestEventsBodySchema = z.object({
+  eventIds: z.array(z.uuid()).min(1),
+});
+
 export type CreateGuestBody = z.infer<typeof createGuestBodySchema>;
 export type UpdateGuestBody = z.infer<typeof updateGuestBodySchema>;
+export type SetGuestEventsBody = z.infer<typeof setGuestEventsBodySchema>;

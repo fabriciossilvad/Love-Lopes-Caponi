@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 
 import { getEnv } from '../../../config/env.js';
-import type { CreateInvitationBody, UpdateInvitationBody } from './admin-invitation.schemas.js';
+import type { CreateInvitationBody, InvitationListQuery, UpdateInvitationBody } from './admin-invitation.schemas.js';
 
 function createAdminRlsClient(accessToken: string) {
   const env = getEnv();
@@ -23,9 +23,40 @@ function payload(input: CreateInvitationBody | UpdateInvitationBody) {
   };
 }
 
-export async function listAdminInvitations(accessToken: string) {
-  const { data, error } = await createAdminRlsClient(accessToken)
-    .from('invitations').select(fields).order('created_at', { ascending: false });
+export async function listAdminInvitations(accessToken: string, filters: InvitationListQuery = {}) {
+  const supabase = createAdminRlsClient(accessToken);
+
+  if (!filters.eventId && !filters.rsvpStatus) {
+    const { data, error } = await supabase
+      .from('invitations').select(fields).order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
+
+  let memberships = supabase
+    .from('guest_events')
+    .select('guest_id, event_id, rsvp_status, guests!inner(invitation_id)');
+
+  if (filters.eventId) memberships = memberships.eq('event_id', filters.eventId);
+  if (filters.rsvpStatus) memberships = memberships.eq('rsvp_status', filters.rsvpStatus);
+
+  const { data: matches, error: membershipError } = await memberships;
+  if (membershipError) throw membershipError;
+
+  const invitationIds = [...new Set(
+    (matches ?? []).map((row) => {
+      const guest = row.guests as unknown as { invitation_id: string };
+      return guest.invitation_id;
+    }),
+  )];
+
+  if (invitationIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('invitations')
+    .select(fields)
+    .in('id', invitationIds)
+    .order('created_at', { ascending: false });
   if (error) throw error;
   return data;
 }

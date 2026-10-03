@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const invitationListQuerySchema = z.object({
+  eventId: z.uuid().optional(),
+  rsvpStatus: z.enum(['PENDING', 'CONFIRMED', 'DECLINED']).optional(),
+});
+
 export const invitationIdParamsSchema = z.object({
   invitationId: z.uuid(),
 });
@@ -16,5 +21,6 @@ export const updateInvitationBodySchema = createInvitationBodySchema
     message: 'Informe ao menos um campo para atualização.',
   });
 
+export type InvitationListQuery = z.infer<typeof invitationListQuerySchema>;
 export type CreateInvitationBody = z.infer<typeof createInvitationBodySchema>;
 export type UpdateInvitationBody = z.infer<typeof updateInvitationBodySchema>;

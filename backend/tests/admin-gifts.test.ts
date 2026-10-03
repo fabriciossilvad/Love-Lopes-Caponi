@@ -37,58 +37,6 @@ const admin = {
 afterEach(async () => {
   vi.clearAllMocks();
   await Promise.all(apps.splice(0).map((app) => app.close()));
-  it('uploads a JPEG gift image', async () => {
-    mockedAuth.mockResolvedValue(admin);
-    mockedUploadImage.mockResolvedValue({
-      gift: { id: '11111111-1111-4111-8111-111111111111', image_path: '11111111-1111-4111-8111-111111111111/image.jpg' },
-      imagePath: '11111111-1111-4111-8111-111111111111/image.jpg',
-      publicUrl: 'https://example.test/image.jpg',
-    } as never);
-    const app = buildApp(); apps.push(app);
-
-    const boundary = 'gift-image-boundary';
-    const body = Buffer.concat([
-      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="gift.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`),
-      Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
-      Buffer.from(`\r\n--${boundary}--\r\n`),
-    ]);
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/admin/gifts/11111111-1111-4111-8111-111111111111/image',
-      headers: { authorization: 'Bearer test-admin-token', 'content-type': `multipart/form-data; boundary=${boundary}` },
-      payload: body,
-    });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.json()).toMatchObject({ imagePath: '11111111-1111-4111-8111-111111111111/image.jpg' });
-    expect(mockedUploadImage).toHaveBeenCalledWith(
-      'test-admin-token',
-      '11111111-1111-4111-8111-111111111111',
-      expect.any(Buffer),
-      'image/jpeg',
-    );
-  });
-
-  it('rejects unsupported gift image types', async () => {
-    mockedAuth.mockResolvedValue(admin);
-    const app = buildApp(); apps.push(app);
-    const boundary = 'gift-file-boundary';
-    const body = Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="gift.txt"\r\nContent-Type: text/plain\r\n\r\nnope\r\n--${boundary}--\r\n`,
-    );
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/admin/gifts/11111111-1111-4111-8111-111111111111/image',
-      headers: { authorization: 'Bearer test-admin-token', 'content-type': `multipart/form-data; boundary=${boundary}` },
-      payload: body,
-    });
-
-    expect(response.statusCode).toBe(415);
-    expect(response.json()).toMatchObject({ error: 'INVALID_GIFT_IMAGE_TYPE' });
-    expect(mockedUploadImage).not.toHaveBeenCalled();
-  });
 });
 
 describe('admin gift API', () => {
@@ -148,4 +96,53 @@ describe('admin gift API', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({ error: 'GIFT_UPDATE_FAILED' });
   });
+
+  it('uploads a JPEG gift image', async () => {
+    mockedAuth.mockResolvedValue(admin);
+    mockedUploadImage.mockResolvedValue({
+      gift: { id: '11111111-1111-4111-8111-111111111111', image_path: '11111111-1111-4111-8111-111111111111/image.jpg' },
+      imagePath: '11111111-1111-4111-8111-111111111111/image.jpg',
+      publicUrl: 'https://example.test/image.jpg',
+    } as never);
+    const app = buildApp(); apps.push(app);
+    const boundary = 'gift-image-boundary';
+    const body = Buffer.concat([
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="gift.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`),
+      Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    ]);
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/admin/gifts/11111111-1111-4111-8111-111111111111/image',
+      headers: { authorization: 'Bearer test-admin-token', 'content-type': `multipart/form-data; boundary=${boundary}` },
+      payload: body,
+    });
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({ imagePath: '11111111-1111-4111-8111-111111111111/image.jpg' });
+    expect(mockedUploadImage).toHaveBeenCalledWith(
+      'test-admin-token',
+      '11111111-1111-4111-8111-111111111111',
+      expect.any(Buffer),
+      'image/jpeg',
+    );
+  });
+
+  it('rejects unsupported gift image types', async () => {
+    mockedAuth.mockResolvedValue(admin);
+    const app = buildApp(); apps.push(app);
+    const boundary = 'gift-file-boundary';
+    const body = Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="gift.txt"\r\nContent-Type: text/plain\r\n\r\nnope\r\n--${boundary}--\r\n`,
+    );
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/admin/gifts/11111111-1111-4111-8111-111111111111/image',
+      headers: { authorization: 'Bearer test-admin-token', 'content-type': `multipart/form-data; boundary=${boundary}` },
+      payload: body,
+    });
+    expect(response.statusCode).toBe(415);
+    expect(response.json()).toMatchObject({ error: 'INVALID_GIFT_IMAGE_TYPE' });
+    expect(mockedUploadImage).not.toHaveBeenCalled();
+  });
+
 });

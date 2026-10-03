@@ -8,7 +8,17 @@ import { rsvpRoutes } from './modules/rsvp/rsvp.routes.js';
 
 export function buildApp() {
   const app = Fastify({
-    logger: true,
+    logger: {
+      serializers: {
+        req(request) {
+          return {
+            method: request.method,
+            hostname: request.hostname,
+            remoteAddress: request.ip,
+          };
+        },
+      },
+    },
   });
 
   app.register(healthRoutes, { prefix: '/health' });

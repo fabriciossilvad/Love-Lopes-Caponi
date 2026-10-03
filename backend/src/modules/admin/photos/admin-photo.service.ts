@@ -35,7 +35,7 @@ export async function listAdminPhotos(accessToken: string) {
   return data;
 }
 
-export async function createAdminPhoto(accessToken: string, file: Buffer, mimetype: string, fields: { eventId?: string | null; caption?: string | null; displayOrder: number; active: boolean }) {
+export async function createAdminPhoto(accessToken: string, file: Buffer, mimetype: string, fields: { eventId?: string | null | undefined; caption?: string | null | undefined; displayOrder: number; active: boolean }) {
   const extension = allowedTypes.get(mimetype);
   if (!extension) throw new Error('INVALID_PHOTO_TYPE');
   const supabase = client(accessToken);

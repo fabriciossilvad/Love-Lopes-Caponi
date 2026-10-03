@@ -25,6 +25,25 @@ export function isAllowedGiftImageType(mimetype: string) {
   return allowedTypes.has(mimetype);
 }
 
+export function hasValidGiftImageSignature(file: Buffer, mimetype: string) {
+  if (mimetype === 'image/jpeg') {
+    return file.length >= 3 && file[0] === 0xff && file[1] === 0xd8 && file[2] === 0xff;
+  }
+
+  if (mimetype === 'image/png') {
+    const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    return file.length >= signature.length && signature.every((byte, index) => file[index] === byte);
+  }
+
+  if (mimetype === 'image/webp') {
+    return file.length >= 12
+      && file.subarray(0, 4).toString('ascii') === 'RIFF'
+      && file.subarray(8, 12).toString('ascii') === 'WEBP';
+  }
+
+  return false;
+}
+
 export async function uploadAdminGiftImage(
   accessToken: string,
   giftId: string,

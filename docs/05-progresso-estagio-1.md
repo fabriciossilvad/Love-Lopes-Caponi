@@ -60,4 +60,16 @@ Desenvolvimento do backend/API:
 9. testes automatizados;
 10. testes reais de RLS/autorização.
 
-O frontend será iniciado após os contratos principais do backend estarem definidos e validados.
+## Atualização — fechamento do backend MVP v1
+
+O backend/API do MVP foi implementado e validado em ambiente de aplicação, incluindo autenticação administrativa, RLS, acesso público por token, RSVP, eventos, convites, convidados, presentes, reservas, categorias, conteúdo público, galeria e Storage.
+
+A suíte automatizada encontra-se com **42 testes passando**. Os fluxos administrativos, públicos e as principais regras de autorização/RLS também foram validados por chamadas reais.
+
+Decisões consolidadas para o MVP v1:
+- imagens da galeria e de presentes: limite de 5 MB;
+- formatos de imagem suportados: JPEG, PNG e WebP;
+- override administrativo de RSVP após o prazo: possível feature futura, não obrigatória no MVP atual;
+- pagamentos permanecem fora do MVP.
+
+Com os contratos principais do backend definidos e validados, o projeto está apto a iniciar o desenvolvimento do frontend.

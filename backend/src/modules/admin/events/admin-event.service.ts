@@ -48,8 +48,37 @@ export async function createAdminEvent(accessToken: string, input: CreateEventBo
 }
 
 export async function updateAdminEvent(accessToken: string, eventId: string, input: UpdateEventBody) {
-  const { data, error } = await createAdminRlsClient(accessToken)
-    .from('events').update(toDatabasePayload(input)).eq('id', eventId).select(fields).maybeSingle();
+  const client = createAdminRlsClient(accessToken);
+
+  const { data: currentEvent, error: readError } = await client
+    .from('events')
+    .select('id, event_date, rsvp_deadline')
+    .eq('id', eventId)
+    .maybeSingle();
+
+  if (readError) throw readError;
+  if (!currentEvent) return null;
+
+  const eventDate = input.eventDate ?? currentEvent.event_date;
+  const rsvpDeadline =
+    input.rsvpDeadline !== undefined
+      ? input.rsvpDeadline
+      : currentEvent.rsvp_deadline;
+
+  if (
+    rsvpDeadline !== null &&
+    new Date(rsvpDeadline) > new Date(eventDate)
+  ) {
+    throw new Error('RSVP_DEADLINE_AFTER_EVENT');
+  }
+
+  const { data, error } = await client
+    .from('events')
+    .update(toDatabasePayload(input))
+    .eq('id', eventId)
+    .select(fields)
+    .single();
+
   if (error) throw error;
   return data;
 }

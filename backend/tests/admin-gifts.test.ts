@@ -18,7 +18,7 @@ vi.mock('../src/modules/admin/gifts/admin-gift.service.js', () => ({
 
 import { buildApp } from '../src/app.js';
 import { getAuthenticatedAdmin } from '../src/modules/admin/admin-auth.service.js';
-import { uploadAdminGiftImage } from '../src/modules/admin/gifts/admin-gift-image.service.js';
+import { hasValidGiftImageSignature, uploadAdminGiftImage } from '../src/modules/admin/gifts/admin-gift-image.service.js';
 import { createAdminGift, listAdminGifts, updateAdminGift } from '../src/modules/admin/gifts/admin-gift.service.js';
 
 const apps: ReturnType<typeof buildApp>[] = [];
@@ -27,6 +27,7 @@ const mockedList = vi.mocked(listAdminGifts);
 const mockedCreate = vi.mocked(createAdminGift);
 const mockedUpdate = vi.mocked(updateAdminGift);
 const mockedUploadImage = vi.mocked(uploadAdminGiftImage);
+const mockedImageSignature = vi.mocked(hasValidGiftImageSignature);
 
 const admin = {
   userId: '6ace1121-3164-4ea0-a0c4-da029e3d5898',
@@ -143,6 +144,26 @@ describe('admin gift API', () => {
     });
     expect(response.statusCode).toBe(415);
     expect(response.json()).toMatchObject({ error: 'INVALID_GIFT_IMAGE_TYPE' });
+    expect(mockedUploadImage).not.toHaveBeenCalled();
+  });
+
+
+  it('rejects a file whose declared image MIME does not match its content', async () => {
+    mockedAuth.mockResolvedValue(admin);
+    mockedImageSignature.mockReturnValueOnce(false);
+    const app = buildApp(); apps.push(app);
+    const boundary = 'spoofed-image-boundary';
+    const body = Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="fake.jpg"\r\nContent-Type: image/jpeg\r\n\r\nthis is not a jpeg\r\n--${boundary}--\r\n`,
+    );
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/admin/gifts/11111111-1111-4111-8111-111111111111/image',
+      headers: { authorization: 'Bearer test-admin-token', 'content-type': `multipart/form-data; boundary=${boundary}` },
+      payload: body,
+    });
+    expect(response.statusCode).toBe(415);
+    expect(response.json()).toMatchObject({ error: 'INVALID_GIFT_IMAGE_CONTENT' });
     expect(mockedUploadImage).not.toHaveBeenCalled();
   });
 

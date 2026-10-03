@@ -1,3 +1,4 @@
+import multipart from '@fastify/multipart';
 import Fastify from 'fastify';
 
 import { adminRoutes } from './modules/admin/admin.routes.js';
@@ -24,6 +25,10 @@ export function buildApp() {
         },
       },
     },
+  });
+
+  app.register(multipart, {
+    limits: { files: 1, fileSize: 5 * 1024 * 1024 },
   });
 
   app.register(healthRoutes, { prefix: '/health' });

@@ -17,8 +17,8 @@ const eventFieldsSchema = z.object({
 });
 
 function hasValidRsvpDeadline(data: {
-  eventDate?: string;
-  rsvpDeadline?: string | null;
+  eventDate?: string | undefined;
+  rsvpDeadline?: string | null | undefined;
 }) {
   if (!data.eventDate || !data.rsvpDeadline) {
     return true;

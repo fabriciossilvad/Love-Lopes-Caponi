@@ -1,15 +1,20 @@
 import type { FastifyPluginAsync } from 'fastify';
 
 import { requireAdmin } from '../admin-auth.js';
-import { createInvitationBodySchema, invitationIdParamsSchema, updateInvitationBodySchema } from './admin-invitation.schemas.js';
+import { createInvitationBodySchema, invitationIdParamsSchema, invitationListQuerySchema, updateInvitationBodySchema } from './admin-invitation.schemas.js';
 import { createAdminInvitation, getAdminInvitationDetails, listAdminInvitations, updateAdminInvitation } from './admin-invitation.service.js';
 
 export const adminInvitationRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/', async (request, reply) => {
+    const query = invitationListQuerySchema.safeParse(request.query);
+    if (!query.success) {
+      return reply.status(400).send({ error: 'INVALID_INVITATION_FILTER', message: 'Filtros de convite inválidos.' });
+    }
+
     try {
-      return await listAdminInvitations(request.adminAccessToken);
+      return await listAdminInvitations(request.adminAccessToken, query.data);
     } catch (error) {
       request.log.error({ err: error }, 'Admin invitation list failed');
       return reply.status(500).send({ error: 'INVITATION_LIST_FAILED', message: 'Não foi possível listar os convites.' });

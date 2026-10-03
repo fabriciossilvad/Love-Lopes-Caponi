@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 
 import { requireAdmin } from '../admin-auth.js';
 import { createGiftBodySchema, giftIdParamsSchema, updateGiftBodySchema } from './admin-gift.schemas.js';
+import { isAllowedGiftImageType, uploadAdminGiftImage } from './admin-gift-image.service.js';
 import { createAdminGift, listAdminGifts, updateAdminGift } from './admin-gift.service.js';
 
 export const adminGiftRoutes: FastifyPluginAsync = async (app) => {
@@ -26,6 +27,36 @@ export const adminGiftRoutes: FastifyPluginAsync = async (app) => {
     } catch (error) {
       request.log.warn({ err: error }, 'Admin gift creation failed');
       return reply.status(409).send({ error: 'GIFT_CREATION_FAILED', message: 'Não foi possível criar o presente.' });
+    }
+  });
+
+  app.post('/:giftId/image', async (request, reply) => {
+    const params = giftIdParamsSchema.safeParse(request.params);
+    if (!params.success) {
+      return reply.status(400).send({ error: 'INVALID_GIFT_ID', message: 'Presente inválido.' });
+    }
+
+    try {
+      const part = await request.file();
+      if (!part) {
+        return reply.status(400).send({ error: 'GIFT_IMAGE_REQUIRED', message: 'Envie uma imagem.' });
+      }
+      if (!isAllowedGiftImageType(part.mimetype)) {
+        part.file.resume();
+        return reply.status(415).send({ error: 'INVALID_GIFT_IMAGE_TYPE', message: 'Use JPEG, PNG ou WebP.' });
+      }
+
+      const buffer = await part.toBuffer();
+      return reply.status(201).send(
+        await uploadAdminGiftImage(request.adminAccessToken, params.data.giftId, buffer, part.mimetype),
+      );
+    } catch (error) {
+      request.log.warn({ err: error }, 'Admin gift image upload failed');
+      const code = (error as { code?: string }).code;
+      if (code === 'FST_REQ_FILE_TOO_LARGE') {
+        return reply.status(413).send({ error: 'GIFT_IMAGE_TOO_LARGE', message: 'A imagem deve ter no máximo 5 MB.' });
+      }
+      return reply.status(409).send({ error: 'GIFT_IMAGE_UPLOAD_FAILED', message: 'Não foi possível salvar a imagem.' });
     }
   });
 

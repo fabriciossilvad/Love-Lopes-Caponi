@@ -44,3 +44,53 @@ export async function updateAdminInvitation(accessToken: string, invitationId: s
   if (error) throw error;
   return data;
 }
+
+
+export async function getAdminInvitationDetails(accessToken: string, invitationId: string) {
+  const supabase = createAdminRlsClient(accessToken);
+
+  const { data: invitation, error: invitationError } = await supabase
+    .from('invitations')
+    .select(fields)
+    .eq('id', invitationId)
+    .maybeSingle();
+
+  if (invitationError) throw invitationError;
+  if (!invitation) return null;
+
+  const { data: guests, error: guestsError } = await supabase
+    .from('guests')
+    .select(`
+      id,
+      invitation_id,
+      name,
+      phone,
+      email,
+      notes,
+      status,
+      created_at,
+      updated_at,
+      guest_events (
+        event_id,
+        rsvp_status,
+        responded_at,
+        events (
+          id,
+          name,
+          slug,
+          event_date,
+          rsvp_deadline,
+          status
+        )
+      )
+    `)
+    .eq('invitation_id', invitationId)
+    .order('name', { ascending: true });
+
+  if (guestsError) throw guestsError;
+
+  return {
+    ...invitation,
+    guests: guests ?? [],
+  };
+}

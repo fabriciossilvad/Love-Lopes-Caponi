@@ -3,6 +3,7 @@ import Fastify from 'fastify';
 import { adminRoutes } from './modules/admin/admin.routes.js';
 import { adminEventRoutes } from './modules/admin/events/admin-event.routes.js';
 import { adminGuestRoutes } from './modules/admin/guests/admin-guest.routes.js';
+import { adminGiftRoutes } from './modules/admin/gifts/admin-gift.routes.js';
 import { adminInvitationRoutes } from './modules/admin/invitations/admin-invitation.routes.js';
 import { giftReservationRoutes } from './modules/gift-reservations/gift-reservation.routes.js';
 import { giftRoutes } from './modules/gifts/gift.routes.js';
@@ -30,6 +31,7 @@ export function buildApp() {
   app.register(adminEventRoutes, { prefix: '/api/admin/events' });
   app.register(adminInvitationRoutes, { prefix: '/api/admin/invitations' });
   app.register(adminGuestRoutes, { prefix: '/api/admin/guests' });
+  app.register(adminGiftRoutes, { prefix: '/api/admin/gifts' });
   app.register(invitationRoutes, { prefix: '/api/invitations' });
   app.register(giftRoutes, { prefix: '/api' });
   app.register(giftReservationRoutes, { prefix: '/api/gift-reservations' });

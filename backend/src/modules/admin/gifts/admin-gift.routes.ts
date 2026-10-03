@@ -2,7 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 
 import { requireAdmin } from '../admin-auth.js';
 import { createGiftBodySchema, giftIdParamsSchema, updateGiftBodySchema } from './admin-gift.schemas.js';
-import { isAllowedGiftImageType, uploadAdminGiftImage } from './admin-gift-image.service.js';
+import { hasValidGiftImageSignature, isAllowedGiftImageType, uploadAdminGiftImage } from './admin-gift-image.service.js';
 import { createAdminGift, listAdminGifts, updateAdminGift } from './admin-gift.service.js';
 
 export const adminGiftRoutes: FastifyPluginAsync = async (app) => {
@@ -47,6 +47,13 @@ export const adminGiftRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const buffer = await part.toBuffer();
+      if (!hasValidGiftImageSignature(buffer, part.mimetype)) {
+        return reply.status(415).send({
+          error: 'INVALID_GIFT_IMAGE_CONTENT',
+          message: 'O conteúdo do arquivo não corresponde a uma imagem válida.',
+        });
+      }
+
       return reply.status(201).send(
         await uploadAdminGiftImage(request.adminAccessToken, params.data.giftId, buffer, part.mimetype),
       );

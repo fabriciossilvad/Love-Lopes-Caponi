@@ -44,7 +44,7 @@ Esta é a primeira versão oficial das regras de negócio consolidadas no Estág
 
 **RN18.** Após o prazo, o convidado não pode alterar publicamente o RSVP.
 
-**RN19.** Administradores podem corrigir/alterar RSVP mesmo após o prazo.
+**RN19.** Correção/alteração administrativa de RSVP após o prazo não faz parte do MVP atual e fica registrada como possível feature futura.
 
 ## Presentes e categorias
 

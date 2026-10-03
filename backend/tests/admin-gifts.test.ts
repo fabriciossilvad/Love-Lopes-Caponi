@@ -6,6 +6,7 @@ vi.mock('../src/modules/admin/admin-auth.service.js', () => ({
 
 vi.mock('../src/modules/admin/gifts/admin-gift-image.service.js', () => ({
   isAllowedGiftImageType: vi.fn((mimetype: string) => ['image/jpeg', 'image/png', 'image/webp'].includes(mimetype)),
+  hasValidGiftImageSignature: vi.fn(() => true),
   uploadAdminGiftImage: vi.fn(),
 }));
 

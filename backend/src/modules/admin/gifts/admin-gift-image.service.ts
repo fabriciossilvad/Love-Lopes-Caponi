@@ -35,6 +35,17 @@ export async function uploadAdminGiftImage(
   if (!extension) throw new Error('INVALID_GIFT_IMAGE_TYPE');
 
   const storage = client(accessToken);
+
+  const { data: currentGift, error: giftError } = await storage
+    .from('gifts')
+    .select('id, image_path')
+    .eq('id', giftId)
+    .maybeSingle();
+
+  if (giftError) throw giftError;
+  if (!currentGift) throw new Error('GIFT_NOT_FOUND');
+
+  const previousImagePath = currentGift.image_path;
   const path = `${giftId}/${randomUUID()}.${extension}`;
 
   const { error: uploadError } = await storage.storage.from(BUCKET).upload(path, file, {
@@ -45,7 +56,23 @@ export async function uploadAdminGiftImage(
 
   try {
     const gift = await updateAdminGift(accessToken, giftId, { imagePath: path } as UpdateGiftBody);
-    return { gift, imagePath: path, publicUrl: storage.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
+
+    if (previousImagePath && previousImagePath !== path) {
+      const { error: removeError } = await storage.storage.from(BUCKET).remove([previousImagePath]);
+      if (removeError) {
+        console.warn('Gift image replaced, but previous image cleanup failed', {
+          giftId,
+          previousImagePath,
+          message: removeError.message,
+        });
+      }
+    }
+
+    return {
+      gift,
+      imagePath: path,
+      publicUrl: storage.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,
+    };
   } catch (error) {
     await storage.storage.from(BUCKET).remove([path]);
     throw error;

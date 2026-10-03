@@ -35,7 +35,8 @@ O MVP atual **não processa pagamentos**. Presentes são selecionados/reservados
 - Estados: `PENDING`, `CONFIRMED` e `DECLINED`.
 - Prazo de resposta configurável por evento.
 - Convidado pode alterar sua resposta enquanto estiver dentro do prazo.
-- Após o prazo, alterações públicas são bloqueadas; administrador pode continuar alterando.
+- Após o prazo, alterações públicas são bloqueadas.
+- Correção administrativa de RSVP após o prazo fica registrada como possível evolução futura, fora do MVP atual.
 
 ### Presentes
 - Catálogo separado por evento.
@@ -48,7 +49,6 @@ O MVP atual **não processa pagamentos**. Presentes são selecionados/reservados
 ### Administração
 - Login administrativo.
 - Gestão de eventos, convites, convidados e vínculos com eventos.
-- Gestão/correção de RSVP.
 - Gestão de categorias e presentes.
 - Gestão de reservas, incluindo liberação/cancelamento.
 - Gestão de galeria e conteúdo público.
@@ -76,3 +76,4 @@ O MVP atual **não processa pagamentos**. Presentes são selecionados/reservados
 - Upload de arquivos por convidados.
 - CMS complexo.
 - Autocadastro de convidados.
+- Override/correção administrativa de RSVP após o prazo (possível feature futura).

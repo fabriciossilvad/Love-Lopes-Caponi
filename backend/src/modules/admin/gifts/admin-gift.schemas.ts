@@ -10,11 +10,14 @@ const giftFieldsSchema = z.object({
   imagePath: z.string().trim().min(1).nullable().optional(),
   estimatedValue: z.number().nonnegative().nullable().optional(),
   quantity: z.number().int().positive(),
+  status: z.enum(['ACTIVE', 'INACTIVE']),
+  displayOrder: z.number().int().nonnegative(),
+});
+
+export const createGiftBodySchema = giftFieldsSchema.extend({
   status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
   displayOrder: z.number().int().nonnegative().default(0),
 });
-
-export const createGiftBodySchema = giftFieldsSchema;
 
 export const updateGiftBodySchema = giftFieldsSchema.partial().refine(
   (data) => Object.keys(data).length > 0,

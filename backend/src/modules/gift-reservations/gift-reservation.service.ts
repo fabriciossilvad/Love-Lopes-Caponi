@@ -32,3 +32,10 @@ export async function cancelGiftReservation(token: string, reservationId: string
 
   return data?.[0] ?? null;
 }
+
+export async function listInvitationGiftReservations(token: string) {
+  const supabase = createSupabaseAnonClient();
+  const { data, error } = await supabase.rpc('list_invitation_gift_reservations', {p_token: token});
+  if (error) throw error;
+  return data ?? [];
+}

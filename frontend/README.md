@@ -55,3 +55,14 @@ O frontend não utiliza credenciais administrativas nem `service_role`. O token 
 4. Ao recarregar a página, o catálogo recupera as reservas e habilita o cancelamento.
 
 **Privacidade:** qualquer pessoa com o link do convite pode ver e cancelar as reservas desse convite. Não compartilhe o token em logs ou capturas de tela. O endpoint não permite consultar reservas de outros convites sem o token correspondente.
+
+
+## Painel administrativo — eventos
+
+Acesse `/admin/login` com uma conta ativa de administrador. O módulo `/admin/eventos` permite listar, criar e editar eventos via `GET /api/admin/events`, `POST /api/admin/events` e `PATCH /api/admin/events/:eventId`.
+
+- Datas inseridas em `datetime-local` são convertidas para ISO UTC antes do envio; na edição, são exibidas no fuso local do navegador.
+- Status: `DRAFT`, `ACTIVE`, `FINISHED`.
+- O prazo de RSVP não pode ser posterior à data do evento.
+- Não há exclusão de eventos nesta entrega.
+- Antes de criar registros de teste, prefira editar um evento de teste existente ou usar um identificador exclusivo; o cadastro persiste no Supabase conectado.

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { CalendarDays, Pencil, Plus, RefreshCw, X } from 'lucide-react';
+import { Pencil, Plus, RefreshCw, X } from 'lucide-react';
 import { createEvent, EventApiError, listEvents, updateEvent, type AdminEvent, type EventInput, type EventStatus } from '../services/adminEvents';
 import { readSession, refresh, storeSession } from '../services/adminAuth';
 import type { AdminSession } from '../services/adminAuth';

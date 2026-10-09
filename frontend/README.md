@@ -1,14 +1,45 @@
-# Frontend
+# Frontend — Love, Lopes & Caponi
 
-Frontend do projeto **Love, Lopes & Caponi**.
+Frontend público do projeto, em React, TypeScript, Vite e Tailwind CSS.
 
-Esta pasta receberá posteriormente:
+## Pré-requisitos
 
-- site público do casamento;
-- páginas dos eventos;
-- convite e RSVP;
-- lista e reserva de presentes;
-- galeria;
-- painel administrativo.
+- Node.js 22 ou superior
+- Backend local executando em http://localhost:3001
 
-O frontend será iniciado após a camada principal do backend estar validada.
+## Executar localmente
+
+No diretório `frontend`:
+
+```powershell
+npm install
+npm run typecheck
+npm test
+npm run build
+npm run dev
+```
+
+Abra http://localhost:5173.
+
+## Testar o convite
+
+Com o backend local ativo e dados de desenvolvimento carregados, abra:
+
+```text
+http://localhost:5173/convite/TESTE-FAMILIA-SILVA-2027-AAAA
+```
+
+O Vite encaminha as chamadas `/api` ao backend local na porta 3001. Tokens de teste são apenas para ambiente de desenvolvimento e nunca devem ser utilizados em produção.
+
+## Escopo desta entrega
+
+- Home provisória
+- Rota de convite com nome, convidados e eventos
+- Estados de carregamento, token inválido e falha de rede
+- Testes básicos do serviço HTTP
+
+Ainda não inclui RSVP, presentes ou painel administrativo. Consulte `docs/07-frontend-entrega-1.md`.
+
+## Segurança
+
+O frontend não utiliza credenciais administrativas nem `service_role`. O token do convite é uma credencial e não deve ser incluído em logs, ferramentas de analytics ou compartilhado fora do contexto do convite.

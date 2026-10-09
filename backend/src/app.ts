@@ -2,6 +2,7 @@ import multipart from '@fastify/multipart';
 import Fastify from 'fastify';
 
 import { adminRoutes } from './modules/admin/admin.routes.js';
+import { adminSessionRoutes } from './modules/admin/admin-session.routes.js';
 import { adminEventRoutes } from './modules/admin/events/admin-event.routes.js';
 import { adminGiftCategoryRoutes } from './modules/admin/gift-categories/admin-gift-category.routes.js';
 import { adminGiftReservationRoutes } from './modules/admin/gift-reservations/admin-gift-reservation.routes.js';
@@ -39,6 +40,7 @@ export function buildApp() {
 
   app.register(healthRoutes, { prefix: '/health' });
   app.register(adminRoutes, { prefix: '/api/admin' });
+  app.register(adminSessionRoutes, { prefix: '/api/admin' });
   app.register(adminEventRoutes, { prefix: '/api/admin/events' });
   app.register(adminInvitationRoutes, { prefix: '/api/admin/invitations' });
   app.register(adminGuestRoutes, { prefix: '/api/admin/guests' });

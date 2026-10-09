@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import { listGiftReservationsQuerySchema } from './gift-reservation.list.schemas.js';
 
 import {
   cancelGiftReservationBodySchema,
@@ -8,9 +9,20 @@ import {
 import {
   cancelGiftReservation,
   reserveGift,
+  listInvitationGiftReservations,
 } from './gift-reservation.service.js';
 
 export const giftReservationRoutes: FastifyPluginAsync = async (app) => {
+  app.get('/', async (request, reply) => {
+    const query = listGiftReservationsQuerySchema.safeParse(request.query);
+    if (!query.success) return reply.status(400).send({error:'INVALID_TOKEN',message:'Token inválido.'});
+    try { return await listInvitationGiftReservations(query.data.token); }
+    catch (error) {
+      app.log.warn({err:error}, 'Gift reservation lookup failed');
+      return reply.status(403).send({error:'GIFT_RESERVATIONS_NOT_AVAILABLE',message:'Reservas indisponíveis para este convite.'});
+    }
+  });
+
   app.post('/', async (request, reply) => {
     const parsed = reserveGiftBodySchema.safeParse(request.body);
 

@@ -66,3 +66,14 @@ Acesse `/admin/login` com uma conta ativa de administrador. O módulo `/admin/ev
 - O prazo de RSVP não pode ser posterior à data do evento.
 - Não há exclusão de eventos nesta entrega.
 - Antes de criar registros de teste, prefira editar um evento de teste existente ou usar um identificador exclusivo; o cadastro persiste no Supabase conectado.
+
+
+## Painel administrativo — convites
+
+Em `/admin/convites`, administradores podem listar, criar e editar convites, abrir os detalhes com convidados e RSVP e copiar o link público individual. O token é gerado pelo backend e não deve ser publicado em logs, prints ou documentos.
+
+A associação de convidados a eventos não é feita diretamente pelo convite: a API expõe essas associações em `guests[].guest_events[]`. A edição de convidados e suas participações será implementada no módulo seguinte.
+
+Endpoints utilizados: `GET /api/admin/invitations`, `GET /api/admin/invitations/:invitationId`, `POST /api/admin/invitations`, `PATCH /api/admin/invitations/:invitationId`.
+
+Atenção: convites novos são persistidos no Supabase conectado. Use nomes de teste e não compartilhe links de teste com convidados reais.

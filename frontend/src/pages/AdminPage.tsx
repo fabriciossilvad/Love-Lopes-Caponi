@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import { CalendarDays, Gift, Heart, LayoutDashboard, LogOut, Mail, Menu, Users, X } from 'lucide-react';
 import { AdminAuthError, getMe, login, readSession, refresh, storeSession, type AdminSession } from '../services/adminAuth';
@@ -27,14 +27,14 @@ export function AdminPage(){
   }
   void verify();return()=>{active=false}
  },[]);
- async function submit(e:React.FormEvent<HTMLFormElement>){
+ async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();const form=new FormData(e.currentTarget);
   setBusy(true);setError(null);
   try{const next=await login(String(form.get('email')??''),String(form.get('password')??''));storeSession(next);setSession(next);navigate('/admin')}
   catch(e){setError(e instanceof AdminAuthError&&e.kind==='denied'?'Este usuário não possui acesso administrativo.':e instanceof AdminAuthError&&e.kind==='invalid'?'E-mail ou senha inválidos.':'Não foi possível entrar. Tente novamente.')}
   finally{setBusy(false)}
  }
- function logout(){storeSession(null);setSession(null);setError(null);navigate('/admin')}
+ const logout=useCallback(()=>{storeSession(null);setSession(null);setError(null);navigate('/admin')},[navigate]);
  if(checking)return <main className="sans flex min-h-screen items-center justify-center">Verificando sessão...</main>;
  if(!session)return <main className="flex min-h-screen items-center justify-center px-5 py-12"><section className="w-full max-w-md rounded-2xl border border-[#e9e1d5] bg-white p-8 shadow-sm"><Heart size={28} className="mx-auto text-[#b5966c]"/><h1 className="mt-5 text-center text-3xl">Área administrativa</h1><p className="sans mt-3 text-center text-sm text-[#756d61]">Love, Lopes & Caponi</p><form onSubmit={e=>void submit(e)} className="sans mt-8 space-y-5"><label className="block text-sm">E-mail<input name="email" type="email" autoComplete="username" required className="mt-2 w-full rounded-lg border border-[#d9d0c4] p-3"/></label><label className="block text-sm">Senha<input name="password" type="password" autoComplete="current-password" required className="mt-2 w-full rounded-lg border border-[#d9d0c4] p-3"/></label>{error&&<p role="alert" className="text-sm text-[#9a4c40]">{error}</p>}<button disabled={busy} className="w-full rounded-full bg-[#40382e] px-5 py-3 text-white disabled:opacity-50">{busy?'Entrando...':'Entrar'}</button></form><Link to="/" className="sans mt-6 block text-center text-sm underline">Voltar ao site</Link></section></main>;
  return <div className="sans min-h-screen bg-[#faf8f3] md:flex">

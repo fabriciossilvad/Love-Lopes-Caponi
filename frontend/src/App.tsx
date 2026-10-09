@@ -1,0 +1,4 @@
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { InvitationPage } from './pages/InvitationPage';
+function Home(){return <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center"><p className="sans text-xs uppercase tracking-[.3em] text-[#a28b69]">Bem-vindos</p><h1 className="mt-5 text-5xl sm:text-7xl">Love, Lopes & Caponi</h1><p className="sans mt-6 text-sm text-[#71695e]">Um lugar para celebrar nossa história.</p><p className="sans mt-10 text-sm text-[#71695e]">Acesse o link do seu convite para conhecer os eventos.</p></main>}
+export function App(){return <BrowserRouter><Routes><Route path="/" element={<Home/>}/><Route path="/convite/:token" element={<InvitationPage/>}/><Route path="*" element={<main className="p-10"><p>Página não encontrada.</p><Link to="/" className="underline">Voltar ao início</Link></main>}/></Routes></BrowserRouter>}

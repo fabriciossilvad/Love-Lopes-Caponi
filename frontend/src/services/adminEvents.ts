@@ -1,4 +1,3 @@
-import { AdminAuthError } from './adminAuth';
 export type EventStatus='DRAFT'|'ACTIVE'|'FINISHED';
 export interface AdminEvent {
  id:string;name:string;slug:string;description:string|null;event_date:string;venue_name:string|null;address:string|null;maps_url:string|null;rsvp_deadline:string|null;status:EventStatus;additional_info:string|null;created_at:string;updated_at:string;
@@ -23,11 +22,3 @@ export async function listEvents(token:string):Promise<AdminEvent[]>{
 }
 export function createEvent(token:string,input:EventInput){return request<AdminEvent>('',token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)})}
 export function updateEvent(token:string,id:string,input:EventInput){return request<AdminEvent>('/'+encodeURIComponent(id),token,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)})}
-export async function refreshAdminToken():Promise<string>{
- const {readSession,refresh,storeSession}=await import('./adminAuth');
- const session=readSession();
- if(!session)throw new AdminAuthError('invalid');
- const next=await refresh(session.refreshToken);
- storeSession(next);
- return next.accessToken;
-}

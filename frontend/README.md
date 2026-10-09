@@ -35,10 +35,11 @@ O Vite encaminha as chamadas `/api` ao backend local na porta 3001. Tokens de te
 
 - Home provisória
 - Rota de convite com nome, convidados e eventos
+- RSVP individual por convidado e evento, com bloqueio por prazo e feedback de salvamento
 - Estados de carregamento, token inválido e falha de rede
 - Testes básicos do serviço HTTP
 
-Ainda não inclui RSVP, presentes ou painel administrativo. Consulte `docs/07-frontend-entrega-1.md`.
+Ainda não inclui catálogo/reserva de presentes ou painel administrativo. Consulte `docs/07-frontend-entrega-1.md`.
 
 ## Segurança
 

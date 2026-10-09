@@ -36,12 +36,22 @@ O Vite encaminha as chamadas `/api` ao backend local na porta 3001. Tokens de te
 - Home provisória
 - Rota de convite com nome, convidados e eventos
 - RSVP individual por convidado e evento, com bloqueio por prazo e feedback de salvamento
-- Catálogo de presentes por evento, reserva e cancelamento na sessão atual
+- Catálogo de presentes por evento, reserva e cancelamento com recuperação após recarregar a página (exige migration 009 no Supabase)
 - Estados de carregamento, token inválido e falha de rede
 - Testes básicos do serviço HTTP
 
-Ainda não inclui painel administrativo. A identificação da reserva para cancelamento não é recuperável após recarregar a página; as imagens dos presentes ainda usam ícones provisórios. Consulte `docs/07-frontend-entrega-1.md`.
+Ainda não inclui painel administrativo. As imagens dos presentes ainda usam ícones provisórios. O acesso às reservas é por token compartilhado do convite (não por identidade individual). Consulte `docs/07-frontend-entrega-1.md`.
 
 ## Segurança
 
 O frontend não utiliza credenciais administrativas nem `service_role`. O token do convite é uma credencial e não deve ser incluído em logs, ferramentas de analytics ou compartilhado fora do contexto do convite.
+
+
+## Recuperação das reservas
+
+1. Execute `supabase/migrations/009_list_invitation_gift_reservations.sql` no SQL Editor do Supabase.
+2. Reinicie o backend após atualizar o repositório.
+3. `GET /api/gift-reservations?token=<token-do-convite>` retorna somente reservas ativas do convite (sem identidade dos reservantes).
+4. Ao recarregar a página, o catálogo recupera as reservas e habilita o cancelamento.
+
+**Privacidade:** qualquer pessoa com o link do convite pode ver e cancelar as reservas desse convite. Não compartilhe o token em logs ou capturas de tela. O endpoint não permite consultar reservas de outros convites sem o token correspondente.

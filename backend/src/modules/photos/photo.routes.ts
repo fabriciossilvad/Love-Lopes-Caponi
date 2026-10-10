@@ -6,6 +6,7 @@ export const photoRoutes: FastifyPluginAsync = async (app) => {
     const supabase = createSupabaseAnonClient();
     const { data, error } = await supabase.from('photos')
       .select('id, event_id, storage_path, caption, display_order, created_at')
+      .eq('active', true)
       .order('display_order').order('created_at');
     if (error) return reply.status(500).send({ error: 'PHOTO_LIST_FAILED', message: 'Não foi possível carregar a galeria.' });
 

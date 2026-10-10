@@ -107,3 +107,10 @@ A listagem não é pública e não expõe a identidade do responsável no catál
 O painel `/admin/fotos` lista e mostra miniaturas, envia JPEG/PNG/WebP (até 5 MB), permite legenda, ordem, associação opcional a evento e status de visibilidade. A API administrativa utiliza `GET/POST /api/admin/photos` e `PATCH /api/admin/photos/:photoId`. As imagens ficam no bucket `wedding-gallery` do Supabase Storage.
 
 A página pública do convite apresenta a galeria com imagens gerais (sem evento) e imagens dos eventos do convite. O endpoint `GET /api/photos` retorna apenas registros `active=true`, com `public_url`. Não existe substituição de arquivo nem exclusão de fotos nesta versão; para ocultar uma foto, desmarque sua visibilidade no painel. É necessário que o bucket tenha leitura pública configurada.
+
+
+## Conteúdos editáveis
+
+Em `/admin/conteudos`, os noivos podem editar textos da página inicial e da página do convite. Cada campo possui salvamento individual via `PUT /api/admin/site-contents/:key` com `{value:string|null}`. A consulta administrativa utiliza `GET /api/admin/site-contents`; as páginas públicas consultam `GET /api/site-contents`.
+
+Chaves suportadas: `home.eyebrow`, `home.title`, `home.subtitle`, `home.instruction`, `invitation.eyebrow`, `invitation.title`, `invitation.rsvp_intro`, `invitation.gifts_intro`, `invitation.footer`. Campos vazios ou sem registro usam textos padrão. Limites de tamanho são aplicados no formulário; conteúdo é renderizado como texto, não HTML. Alterações aparecem ao recarregar a página pública. Textos específicos dos eventos, como descrição, local e informações adicionais, continuam no módulo administrativo de eventos.

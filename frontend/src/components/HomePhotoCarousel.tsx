@@ -44,7 +44,7 @@ export function HomePhotoCarousel(){
  const next=()=>setIndex(current=>(current+1)%photos.length);
  if(!loading&&!error&&photos.length===0)return null;
  const visible=carouselWindow(photos,index,3);
- return <section aria-label="Galeria de fotos da nossa história" className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-10 sm:pb-24" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocusCapture={()=>setPaused(true)} onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget))setPaused(false)}}>
+ return <section aria-label="Galeria de fotos da nossa história" className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-10 sm:pb-24" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocusCapture={()=>setPaused(true)} onBlurCapture={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setPaused(false)}}>
   <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
    <div><p className="sans text-xs uppercase tracking-[.25em] text-[#8a7457]">Nossa história em imagens</p><h2 className="mt-3 text-3xl text-[#40382e] sm:text-4xl">Nossos momentos</h2></div>
    {photos.length>1&&<div className="flex items-center gap-2">

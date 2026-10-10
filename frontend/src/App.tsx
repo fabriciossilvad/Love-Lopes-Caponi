@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { ArrowRight, Heart, Mail } from 'lucide-react';
 import { InvitationPage } from './pages/InvitationPage';
 import { AdminPage } from './pages/AdminPage';
+import { HomePhotoCarousel } from './components/HomePhotoCarousel';
 import { useSiteContents } from './hooks/useSiteContents';
 import { contentValue } from './services/siteContents';
 
@@ -26,6 +27,7 @@ function Home(){
     <p className="sans mt-4 inline-flex items-center justify-center gap-2 text-xs text-[#8a7457]">Seu convite é pessoal <ArrowRight size={14}/></p>
    </div>
   </section>
+  <HomePhotoCarousel/>
   <footer className="relative px-5 pb-8 text-center"><p className="sans text-[11px] uppercase tracking-[.22em] text-[#8a806f]">Feito com amor · Love, Lopes &amp; Caponi</p></footer>
  </main>;
 }

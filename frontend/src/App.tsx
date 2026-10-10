@@ -18,7 +18,6 @@ function Home(){
   <section className="relative mx-auto flex w-full max-w-4xl flex-col items-center justify-center px-5 pb-8 pt-8 text-center sm:px-10 sm:pb-12 sm:pt-12">
    <div className="mb-5 flex items-center gap-4 text-[#b5966c]"><span className="h-px w-12 bg-[#c7ad87]"/><Heart size={23} strokeWidth={1.25}/><span className="h-px w-12 bg-[#c7ad87]"/></div>
    <p className="sans text-xs font-medium uppercase tracking-[.3em] text-[#8a7457]">{contentValue(values,"home.eyebrow")}</p>
-   <h1 className="mt-4 max-w-3xl text-[clamp(2.7rem,8vw,6rem)] leading-[1.08] tracking-tight text-[#40382e]">{contentValue(values,"home.title")}</h1>
    <div className="my-6 h-px w-24 bg-[#c7ad87]"/>
    <p className="max-w-xl text-lg leading-relaxed text-[#655d53] sm:text-xl">{contentValue(values,"home.subtitle")}</p>
   </section>

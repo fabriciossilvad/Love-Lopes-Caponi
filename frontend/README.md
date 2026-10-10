@@ -100,3 +100,10 @@ Endpoints administrativos: `GET /api/admin/gifts`, `POST /api/admin/gifts`, `PAT
 Em `/admin/reservas`, o administrador consulta reservas ativas e canceladas, filtra por status, pesquisa por presente, evento, convite ou convidado e visualiza as datas. O responsável é identificado pelo convite; o nome do convidado aparece apenas quando a reserva possui `guest_id` associado. A tela permite liberar reservas ativas mediante confirmação, usando `DELETE /api/admin/gift-reservations/:reservationId`, e atualiza a lista após a operação. A consulta utiliza `GET /api/admin/gift-reservations` e exige autenticação administrativa.
 
 A listagem não é pública e não expõe a identidade do responsável no catálogo dos convidados. Cada reserva representa uma unidade. Não há reativação de reservas canceladas pelo painel; a liberação altera o status para `CANCELLED`.
+
+
+## Galeria de fotos
+
+O painel `/admin/fotos` lista e mostra miniaturas, envia JPEG/PNG/WebP (até 5 MB), permite legenda, ordem, associação opcional a evento e status de visibilidade. A API administrativa utiliza `GET/POST /api/admin/photos` e `PATCH /api/admin/photos/:photoId`. As imagens ficam no bucket `wedding-gallery` do Supabase Storage.
+
+A página pública do convite apresenta a galeria com imagens gerais (sem evento) e imagens dos eventos do convite. O endpoint `GET /api/photos` retorna apenas registros `active=true`, com `public_url`. Não existe substituição de arquivo nem exclusão de fotos nesta versão; para ocultar uma foto, desmarque sua visibilidade no painel. É necessário que o bucket tenha leitura pública configurada.

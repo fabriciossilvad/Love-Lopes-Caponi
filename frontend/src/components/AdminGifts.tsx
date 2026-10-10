@@ -83,7 +83,7 @@ export function AdminGifts({session,onExpired}:{session:AdminSession;onExpired:(
     {groups.map(({event,gifts:items})=><section key={event.id} className="overflow-hidden rounded-xl border border-[#e9e1d5] bg-white">
      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e1d5] bg-[#fdfbf7] px-5 py-4"><h2 className="font-serif text-2xl text-[#40382e]">{event.name}</h2><span className="text-xs text-[#756d61]">{items.length} {items.length===1?'presente':'presentes'}</span></div>
      {items.length===0?<p className="p-5 text-sm text-[#756d61]">Nenhum presente cadastrado para este evento.</p>:<div className="divide-y divide-[#eee6da]">{items.map(g=><article key={g.id} className="flex flex-wrap items-center gap-4 px-5 py-4 sm:flex-nowrap">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f0e9df]">{g.image_url?<img src={g.image_url} alt="" loading="lazy" className="h-full w-full object-cover"/>:<ImagePlus size={25} className="text-[#b19b7a]"/>}</div>
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f0e9df]">{<ImagePlus size={25} className="text-[#b19b7a]"/>}</div>
       <div className="min-w-0 flex-1"><h3 className="font-medium text-[#40382e]">{g.name}</h3><p className="mt-1 text-xs text-[#756d61]">Quantidade: {g.quantity} · {g.status==='ACTIVE'?'Ativo':'Inativo'}{g.image_path?'':' · Sem imagem'}</p></div>
       <button onClick={()=>open(g)} className="inline-flex min-h-11 items-center gap-2 text-sm underline"><Pencil size={15}/>Editar</button>
      </article>)}</div>}

@@ -21,13 +21,15 @@ function Home(){
    <h1 className="mt-4 max-w-3xl text-[clamp(2.7rem,8vw,6rem)] leading-[1.08] tracking-tight text-[#40382e]">{contentValue(values,"home.title")}</h1>
    <div className="my-6 h-px w-24 bg-[#c7ad87]"/>
    <p className="max-w-xl text-lg leading-relaxed text-[#655d53] sm:text-xl">{contentValue(values,"home.subtitle")}</p>
-   <div className="mt-7 w-full max-w-md rounded-2xl border border-[#e9e1d5] bg-white/75 px-6 py-7 shadow-[0_16px_55px_-35px_rgba(64,56,46,.3)] sm:px-9">
+  </section>
+  <HomePhotoCarousel/>
+  <section className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5 pb-12 text-center sm:px-10 sm:pb-16">
+   <div className="w-full max-w-md rounded-2xl border border-[#e9e1d5] bg-white/75 px-6 py-7 shadow-[0_16px_55px_-35px_rgba(64,56,46,.3)] sm:px-9">
     <Mail size={22} strokeWidth={1.3} className="mx-auto text-[#aa8a60]"/>
     <p className="sans mt-4 text-sm leading-relaxed text-[#655d53]">{contentValue(values,"home.instruction")}</p>
     <p className="sans mt-4 inline-flex items-center justify-center gap-2 text-xs text-[#8a7457]">Seu convite é pessoal <ArrowRight size={14}/></p>
    </div>
   </section>
-  <HomePhotoCarousel/>
   <footer className="relative px-5 pb-8 text-center"><p className="sans text-[11px] uppercase tracking-[.22em] text-[#8a806f]">Feito com amor · Love, Lopes &amp; Caponi</p></footer>
  </main>;
 }

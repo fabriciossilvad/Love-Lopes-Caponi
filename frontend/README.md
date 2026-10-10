@@ -114,3 +114,19 @@ A página pública do convite apresenta a galeria com imagens gerais (sem evento
 Em `/admin/conteudos`, os noivos podem editar textos da página inicial e da página do convite. Cada campo possui salvamento individual via `PUT /api/admin/site-contents/:key` com `{value:string|null}`. A consulta administrativa utiliza `GET /api/admin/site-contents`; as páginas públicas consultam `GET /api/site-contents`.
 
 Chaves suportadas: `home.eyebrow`, `home.title`, `home.subtitle`, `home.instruction`, `invitation.eyebrow`, `invitation.title`, `invitation.rsvp_intro`, `invitation.gifts_intro`, `invitation.footer`. Campos vazios ou sem registro usam textos padrão. Limites de tamanho são aplicados no formulário; conteúdo é renderizado como texto, não HTML. Alterações aparecem ao recarregar a página pública. Textos específicos dos eventos, como descrição, local e informações adicionais, continuam no módulo administrativo de eventos.
+
+
+## Revisão visual e responsividade (MVP)
+
+A identidade visual usa fundo off-white, texto escuro, dourado champagne e títulos serifados. A página inicial ganhou uma composição editorial, e a página de convite recebeu melhorias de escala tipográfica, cartões e espaçamento. O painel administrativo utiliza menu lateral sobreposto em telas pequenas, com botão de abertura e fechamento; reservas e convites têm cartões próprios no mobile, mantendo tabelas no desktop.
+
+### Checklist manual de homologação
+
+- Executar `npm run typecheck`, `npm test` e `npm run build` no frontend.
+- No DevTools, conferir larguras de 320, 375, 390, 768 e 1280 pixels, sem rolagem horizontal inesperada.
+- Validar página inicial, convite com convidados/eventos, RSVP, presentes, galeria e textos editáveis.
+- No admin, testar login, abertura e fechamento do menu mobile, navegação entre módulos, convites, reservas e formulários.
+- Testar teclado (Tab/Enter/Escape onde aplicável), foco visível, estados de carregamento, erros e botões desabilitados.
+- Conferir o comportamento com textos longos e imagens de diferentes proporções.
+
+A revisão foi aplicada ao código; o comportamento visual precisa de homologação manual em navegadores/dispositivos reais antes da publicação.

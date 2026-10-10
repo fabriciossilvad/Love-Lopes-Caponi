@@ -27,8 +27,8 @@ export function AdminGuests({session,onExpired}:{session:AdminSession;onExpired:
   let active=true;setLoading(true);setError(null);
   async function load(){
    const [invitationList,eventList]=await Promise.all([
-    withGuestAuth(token=>listInvitations(token)).catch(async err=>{if(err instanceof InvitationApiError&&err.kind==='unauthorized')throw new GuestApiError('unauthorized');throw err}),
-    withGuestAuth(token=>listEvents(token)).catch(async err=>{if(err instanceof EventApiError&&err.kind==='unauthorized')throw new GuestApiError('unauthorized');throw err})
+    withGuestAuth(token=>listInvitations(token)).catch(err=>{if(err instanceof InvitationApiError&&err.kind==='unauthorized')throw new GuestApiError('unauthorized');throw err}),
+    withGuestAuth(token=>listEvents(token)).catch(err=>{if(err instanceof EventApiError&&err.kind==='unauthorized')throw new GuestApiError('unauthorized');throw err})
    ]);
    const details=await Promise.all(invitationList.map(invitation=>withGuestAuth(token=>getInvitation(token,invitation.id)).catch(err=>{if(err instanceof InvitationApiError&&err.kind==='unauthorized')throw new GuestApiError('unauthorized');throw err})));
    return {invitationList,eventList,records:details.flatMap((detail:InvitationDetails,index)=>detail.guests.map(guest=>({guest,invitation:invitationList[index]})))};

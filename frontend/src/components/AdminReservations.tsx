@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RefreshCw, XCircle } from 'lucide-react';
 import type { AdminSession } from '../services/adminAuth';
+import { listEvents, type AdminEvent } from '../services/adminEvents';
 import { AdminReservationError, cancelAdminReservation, listAdminReservations, withReservationAuth, type AdminReservation } from '../services/adminReservations';
 type Filter='ALL'|'ACTIVE'|'CANCELLED';
 const date=(value:string|null)=>value?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(value)):'—';
 export function AdminReservations({session,onExpired}:{session:AdminSession;onExpired:()=>void}){
  const [items,setItems]=useState<AdminReservation[]>([]);
+ const [events,setEvents]=useState<AdminEvent[]>([]);
  const [filter,setFilter]=useState<Filter>('ACTIVE');
  const [search,setSearch]=useState('');
  const [loading,setLoading]=useState(true);
@@ -18,7 +20,7 @@ export function AdminReservations({session,onExpired}:{session:AdminSession;onEx
  const handleError=useCallback((err:unknown)=>{if(err instanceof AdminReservationError&&err.kind==='unauthorized'){onExpired();return}setError(err instanceof AdminReservationError&&err.kind==='invalid'?'A reserva não está mais ativa ou não pode ser liberada. Atualize a lista.':'Não foi possível carregar ou alterar as reservas. Tente novamente.')},[onExpired]);
  useEffect(()=>{
   let active=true;setLoading(true);setError(null);
-  withReservationAuth(token=>listAdminReservations(token)).then(data=>{if(active){setItems(data);setHasLoaded(true)}}).catch(err=>{if(active)handleError(err)}).finally(()=>{if(active)setLoading(false)});
+  Promise.all([withReservationAuth(token=>listAdminReservations(token)),withReservationAuth(token=>listEvents(token))]).then(([data,allEvents])=>{if(active){setItems(data);setEvents(allEvents);setHasLoaded(true)}}).catch(err=>{if(active)handleError(err)}).finally(()=>{if(active)setLoading(false)});
   return()=>{active=false};
  },[session.accessToken,revision,handleError]);
  const activeCount=items.filter(item=>item.status==='ACTIVE').length;
@@ -29,6 +31,11 @@ export function AdminReservations({session,onExpired}:{session:AdminSession;onEx
   if(!q)return true;
   return [item.gifts?.name,item.gifts?.events?.name,item.invitations?.display_name,item.guests?.name].some(value=>value?.toLocaleLowerCase('pt-BR').includes(q));
  }),[items,filter,search]);
+ const groups=useMemo(()=>{
+  const byEvent=events.map(event=>({id:event.id,name:event.name,items:visible.filter(item=>item.gifts?.event_id===event.id)}));
+  const unknown=visible.filter(item=>!events.some(event=>event.id===item.gifts?.event_id));
+  return unknown.length?[...byEvent,{id:'unknown',name:'Evento indisponível',items:unknown}]:byEvent;
+ },[events,visible]);
  async function release(item:AdminReservation){
   if(busy||item.status!=='ACTIVE')return;
   const label=item.gifts?.name??'este presente';
@@ -44,8 +51,15 @@ export function AdminReservations({session,onExpired}:{session:AdminSession;onEx
   <div className="mt-6 flex flex-wrap gap-4"><label className="text-sm">Status<select value={filter} onChange={event=>setFilter(event.target.value as Filter)} className="mt-2 block rounded-lg border p-3"><option value="ACTIVE">Ativas</option><option value="CANCELLED">Canceladas</option><option value="ALL">Todas</option></select></label><label className="min-w-52 flex-1 text-sm">Buscar por presente, evento ou convite<input value={search} onChange={event=>setSearch(event.target.value)} placeholder="Pesquisar reservas" className="mt-2 block w-full rounded-lg border p-3"/></label></div>
   {feedback&&<p role="status" className="mt-5 rounded-lg bg-[#f0e9df] p-3 text-sm">{feedback}</p>}
   {error&&<p role="alert" className="mt-5 text-sm text-[#9a4c40]">{error}</p>}
-  {hasLoaded&&visible.length>0&&<div className="mt-6 grid gap-3 md:hidden">{visible.map(item=><article key={item.id} className="min-w-0 rounded-xl border border-[#e9e1d5] bg-white p-5 shadow-sm"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h2 className="font-serif text-lg">{item.gifts?.name??'Presente indisponível'}</h2><p className="mt-1 text-xs text-[#756d61]">{item.gifts?.events?.name??'Evento indisponível'}</p></div><span className={item.status==='ACTIVE'?'shrink-0 rounded-full bg-[#e9f1e7] px-3 py-1 text-xs text-[#477054]':'shrink-0 rounded-full bg-[#f2eee8] px-3 py-1 text-xs text-[#756d61]'}>{item.status==='ACTIVE'?'Ativa':'Cancelada'}</span></div><dl className="mt-4 space-y-2 text-sm"><div><dt className="text-xs text-[#756d61]">Convite</dt><dd>{item.invitations?.display_name??'Indisponível'}</dd></div><div><dt className="text-xs text-[#756d61]">Convidado</dt><dd>{item.guests?.name??'Não informado'}</dd></div><div><dt className="text-xs text-[#756d61]">Reservado em</dt><dd>{date(item.reserved_at)}</dd></div></dl>{item.status==='ACTIVE'&&<button disabled={busy!==null} onClick={()=>void release(item)} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#bca88b] px-4 py-2 text-sm text-[#9a4c40] disabled:opacity-50"><XCircle size={16}/>{busy===item.id?'Liberando...':'Liberar reserva'}</button>}</article>)}</div>}
-  <div className={hasLoaded&&visible.length>0?"mt-6 hidden overflow-x-auto rounded-xl border border-[#e9e1d5] bg-white md:block":"mt-6 overflow-x-auto rounded-xl border border-[#e9e1d5] bg-white"}>{!hasLoaded&&loading?<p role="status" className="p-6 text-sm">Carregando reservas...</p>:visible.length===0?<p className="p-6 text-sm">Nenhuma reserva encontrada para os filtros selecionados.</p>:<table className="hidden w-full min-w-[920px] text-left text-sm md:table"><thead className="border-b bg-[#fdfbf7] text-[#756d61]"><tr><th className="p-4">Presente / evento</th><th className="p-4">Convite</th><th className="p-4">Convidado</th><th className="p-4">Reservado em</th><th className="p-4">Status</th><th className="p-4">Ação</th></tr></thead><tbody>{visible.map(item=><tr key={item.id} className="border-b last:border-0"><td className="p-4"><strong className="font-medium">{item.gifts?.name??'Presente indisponível'}</strong><div className="mt-1 text-xs text-[#756d61]">{item.gifts?.events?.name??'Evento indisponível'}</div></td><td className="p-4">{item.invitations?.display_name??'Convite indisponível'}</td><td className="p-4">{item.guests?.name??'Não informado'}</td><td className="p-4">{date(item.reserved_at)}</td><td className="p-4">{item.status==='ACTIVE'?'Ativa':<>Cancelada<div className="mt-1 text-xs text-[#756d61]">{date(item.cancelled_at)}</div></>}</td><td className="p-4">{item.status==='ACTIVE'?<button disabled={busy!==null} onClick={()=>void release(item)} className="inline-flex items-center gap-2 text-[#9a4c40] underline disabled:opacity-50"><XCircle size={16}/>{busy===item.id?'Liberando...':'Liberar reserva'}</button>:'—'}</td></tr>)}</tbody></table>}</div>
+  <div className="mt-6 space-y-7">
+   {!hasLoaded&&loading?<p role="status" className="text-sm">Carregando reservas...</p>:groups.length===0?<p className="text-sm">Nenhum evento cadastrado.</p>:groups.map(group=><section key={group.id} className="overflow-hidden rounded-xl border border-[#e9e1d5] bg-white">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e1d5] bg-[#fdfbf7] px-5 py-4"><h2 className="font-serif text-2xl text-[#40382e]">{group.name}</h2><span className="text-xs text-[#756d61]">{group.items.length} {group.items.length===1?'reserva':'reservas'}</span></div>
+    {group.items.length===0?<p className="p-5 text-sm text-[#756d61]">Nenhuma reserva encontrada para os filtros selecionados.</p>:<>
+     <div className="grid gap-3 p-4 md:hidden">{group.items.map(item=><article key={item.id} className="min-w-0 rounded-xl border border-[#e9e1d5] bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><h3 className="font-serif text-lg">{item.gifts?.name??'Presente indisponível'}</h3><span className={item.status==='ACTIVE'?'shrink-0 rounded-full bg-[#e9f1e7] px-3 py-1 text-xs text-[#477054]':'shrink-0 rounded-full bg-[#f2eee8] px-3 py-1 text-xs text-[#756d61]'}>{item.status==='ACTIVE'?'Ativa':'Cancelada'}</span></div><dl className="mt-4 space-y-2 text-sm"><div><dt className="text-xs text-[#756d61]">Convite</dt><dd>{item.invitations?.display_name??'Indisponível'}</dd></div><div><dt className="text-xs text-[#756d61]">Convidado</dt><dd>{item.guests?.name??'Não informado'}</dd></div><div><dt className="text-xs text-[#756d61]">Reservado em</dt><dd>{date(item.reserved_at)}</dd></div></dl>{item.status==='ACTIVE'&&<button disabled={busy!==null} onClick={()=>void release(item)} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#bca88b] px-4 py-2 text-sm text-[#9a4c40] disabled:opacity-50"><XCircle size={16}/>{busy===item.id?'Liberando...':'Liberar reserva'}</button>}</article>)}</div>
+     <div className="hidden overflow-x-auto md:block"><table className="w-full min-w-[780px] text-left text-sm"><thead className="border-b bg-[#fdfbf7] text-[#756d61]"><tr><th className="p-4">Presente</th><th className="p-4">Convite</th><th className="p-4">Convidado</th><th className="p-4">Reservado em</th><th className="p-4">Status</th><th className="p-4">Ação</th></tr></thead><tbody>{group.items.map(item=><tr key={item.id} className="border-b last:border-0"><td className="p-4 font-medium">{item.gifts?.name??'Presente indisponível'}</td><td className="p-4">{item.invitations?.display_name??'Convite indisponível'}</td><td className="p-4">{item.guests?.name??'Não informado'}</td><td className="p-4">{date(item.reserved_at)}</td><td className="p-4">{item.status==='ACTIVE'?'Ativa':<>Cancelada<div className="mt-1 text-xs text-[#756d61]">{date(item.cancelled_at)}</div></>}</td><td className="p-4">{item.status==='ACTIVE'?<button disabled={busy!==null} onClick={()=>void release(item)} className="inline-flex items-center gap-2 text-[#9a4c40] underline disabled:opacity-50"><XCircle size={16}/>{busy===item.id?'Liberando...':'Liberar reserva'}</button>:'—'}</td></tr>)}</tbody></table></div>
+    </>}
+   </section>)}
+  </div>
   <p className="mt-5 text-xs text-[#756d61]">Cada reserva corresponde a uma unidade do presente.</p>
  </section>
 }

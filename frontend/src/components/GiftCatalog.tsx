@@ -47,11 +47,11 @@ export function GiftCatalog({token,eventId,eventName}:{token:string;eventId:stri
  }
  return <section className="mt-7 rounded-xl border border-[#e9e1d5] p-5 sm:p-7">
   <div className="flex items-center gap-2"><GiftIcon size={19} className="text-[#aa8a60]"/><h4 className="text-xl">Presentes — {eventName}</h4></div>
-  <p className="sans mt-2 text-xs text-[#756d61]">A reserva não exige pagamento. Quem possui este link de convite pode consultar e cancelar as reservas vinculadas a ele; outros convites não têm acesso a elas.</p>
+  <p className="sans mt-2 text-xs text-[#756d61]">Reserve sem pagamento. Você pode cancelar sua reserva por este convite.</p>
   <div aria-live="polite" className="sans mt-3 min-h-5 text-sm text-[#675d50]">{feedback}</div>
-  {loading&&hasLoaded&&<p role="status" className="sans mt-2 text-xs text-[#756d61]">Atualizando disponibilidade sem interromper a lista...</p>}
+  {loading&&hasLoaded&&<p role="status" className="sans mt-2 text-xs text-[#756d61]">Atualizando disponibilidade...</p>}
   {error&&hasLoaded&&<p role="alert" className="sans mt-2 text-xs text-[#9a4c40]">Não foi possível atualizar. Os dados exibidos podem estar desatualizados.</p>}
-  {!hasLoaded&&loading?<p role="status" className="sans mt-5 text-sm">Carregando presentes e reservas...</p>:!hasLoaded&&error?<div className="sans mt-5 text-sm">Não foi possível carregar os presentes ou as reservas. <button className="underline" onClick={refresh}>Tentar novamente</button></div>:gifts.length===0?<p className="sans mt-5 text-sm">Ainda não há presentes disponíveis para este evento.</p>:<div className="mt-5 grid gap-4 sm:grid-cols-2">
+  {!hasLoaded&&loading?<p role="status" className="sans mt-5 text-sm">Carregando presentes...</p>:!hasLoaded&&error?<div className="sans mt-5 text-sm">Não foi possível carregar os presentes ou as reservas. <button className="underline" onClick={refresh}>Tentar novamente</button></div>:gifts.length===0?<p className="sans mt-5 text-sm">Ainda não há presentes disponíveis para este evento.</p>:<div className="mt-5 grid gap-4 sm:grid-cols-2">
    {gifts.map(gift=>{
     const mine=reservations.filter(r=>r.gift_id===gift.gift_id);
     return <article key={gift.gift_id} className="rounded-xl border border-[#eee6da] bg-[#fdfbf7] p-4">

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { ImagePlus, Pencil, Plus, RefreshCw, X } from 'lucide-react';
+import { ImagePlus, Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 import type { AdminSession } from '../services/adminAuth';
 import { listEvents, type AdminEvent, EventApiError } from '../services/adminEvents';
-import { AdminPhotoError, createAdminPhoto, listAdminPhotos, updateAdminPhoto, withPhotoAuth, type AdminPhoto, type PhotoFields } from '../services/adminPhotos';
+import { AdminPhotoError, createAdminPhoto, deleteAdminPhoto, listAdminPhotos, updateAdminPhoto, withPhotoAuth, type AdminPhoto, type PhotoFields } from '../services/adminPhotos';
 type Form={eventId:string;caption:string;displayOrder:string;active:boolean};
 const blank:Form={eventId:'',caption:'',displayOrder:'0',active:true};
 const types=['image/jpeg','image/png','image/webp'];
@@ -19,6 +19,7 @@ export function AdminPhotos({session,onExpired}:{session:AdminSession;onExpired:
  const [form,setForm]=useState<Form>(blank);
  const [file,setFile]=useState<File|null>(null);
  const [saving,setSaving]=useState(false);
+ const [deleting,setDeleting]=useState<string|null>(null);
  const [error,setError]=useState<string|null>(null);
  const [feedback,setFeedback]=useState<string|null>(null);
  const reload=useCallback(()=>setRevision(n=>n+1),[]);
@@ -48,6 +49,18 @@ export function AdminPhotos({session,onExpired}:{session:AdminSession;onExpired:
    setEditing(undefined);setFeedback(editing?'Foto atualizada.':'Foto enviada com sucesso.');reload();
   }catch(err){handleError(err)}finally{setSaving(false)}
  }
+ async function remove(photo:AdminPhoto){
+  if(deleting||saving)return;
+  if(!window.confirm('Excluir esta foto permanentemente? Ela será removida do site e não poderá ser recuperada.'))return;
+  setDeleting(photo.id);setError(null);setFeedback(null);
+  try{
+   await withPhotoAuth(token=>deleteAdminPhoto(token,photo.id));
+   setPhotos(previous=>previous.filter(item=>item.id!==photo.id));
+   if(editing?.id===photo.id)setEditing(undefined);
+   setFeedback('Foto excluída.');
+  }catch(err){handleError(err)}
+  finally{setDeleting(null)}
+ }
  const sorted=[...photos].sort((a,b)=>a.display_order-b.display_order||a.created_at.localeCompare(b.created_at));
  return <section className="sans">
   <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-widest text-[#a28b69]">Administração</p><h1 className="mt-2 font-serif text-3xl">Galeria de fotos</h1><p className="mt-2 text-sm text-[#756d61]">Envie fotos, escolha o evento e controle a exibição pública.</p></div><button disabled={loading} onClick={()=>open()} className="inline-flex items-center gap-2 rounded-full bg-[#40382e] px-5 py-3 text-sm text-white disabled:opacity-50"><Plus size={17}/>Nova foto</button></div>
@@ -64,7 +77,7 @@ export function AdminPhotos({session,onExpired}:{session:AdminSession;onExpired:
    {editing&&<p className="mt-4 text-xs text-[#756d61]">A substituição do arquivo não está disponível neste formulário. Você pode editar legenda, evento, ordem e visibilidade.</p>}
    <div className="mt-6 flex flex-wrap gap-3"><button disabled={saving} className="rounded-full bg-[#40382e] px-6 py-3 text-sm text-white disabled:opacity-50">{saving?'Salvando...':'Salvar foto'}</button><button type="button" disabled={saving} onClick={()=>setEditing(undefined)} className="rounded-full border px-6 py-3 text-sm">Cancelar</button></div>
   </form>}
-  <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{loading?<p role="status" className="text-sm">Carregando fotos...</p>:sorted.length===0?<p className="text-sm">Nenhuma foto cadastrada.</p>:sorted.map(photo=><article key={photo.id} className="overflow-hidden rounded-xl border border-[#e9e1d5] bg-white"><div className="flex h-44 items-center justify-center overflow-hidden bg-[#f0e9df]">{photo.public_url?<img src={photo.public_url} alt={photo.caption??"Foto da galeria"} loading="lazy" className="h-full w-full object-cover"/>:<ImagePlus size={35} className="text-[#b19b7a]"/>}</div><div className="p-4"><p className="font-medium">{photo.caption??'Sem legenda'}</p><p className="mt-2 text-xs text-[#756d61]">{photo.events?.name??'Todos os eventos'} · Ordem {photo.display_order}</p><p className="mt-2 text-xs">{photo.active?'Visível':'Oculta'}</p><button onClick={()=>open(photo)} className="mt-4 inline-flex items-center gap-2 text-sm underline"><Pencil size={15}/>Editar</button></div></article>)}</div>
+  <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{loading&&photos.length===0?<p role="status" className="text-sm">Carregando fotos...</p>:sorted.length===0?<p className="text-sm">Nenhuma foto cadastrada.</p>:sorted.map(photo=><article key={photo.id} className="overflow-hidden rounded-xl border border-[#e9e1d5] bg-white"><div className="flex h-44 items-center justify-center overflow-hidden bg-[#f0e9df]">{photo.public_url?<img src={photo.public_url} alt={photo.caption??"Foto da galeria"} loading="lazy" className="h-full w-full object-cover"/>:<ImagePlus size={35} className="text-[#b19b7a]"/>}</div><div className="p-4"><p className="font-medium">{photo.caption??'Sem legenda'}</p><p className="mt-2 text-xs text-[#756d61]">{photo.events?.name??'Todos os eventos'} · Ordem {photo.display_order}</p><p className="mt-2 text-xs">{photo.active?'Visível':'Oculta'}</p><div className="mt-4 flex flex-wrap items-center gap-5"><button disabled={deleting!==null} onClick={()=>open(photo)} className="inline-flex items-center gap-2 text-sm underline disabled:opacity-50"><Pencil size={15}/>Editar</button><button disabled={deleting!==null||saving} onClick={()=>void remove(photo)} className="inline-flex items-center gap-2 text-sm text-[#9a4c40] underline disabled:opacity-50"><Trash2 size={15}/>{deleting===photo.id?'Excluindo...':'Excluir'}</button></div></div></article>)}</div>
   <button disabled={loading} onClick={reload} className="mt-6 inline-flex items-center gap-2 text-sm underline disabled:opacity-50"><RefreshCw size={16}/>Atualizar galeria</button>
  </section>
 }

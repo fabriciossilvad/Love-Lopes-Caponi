@@ -29,6 +29,9 @@ export function createAdminPhoto(token:string,file:File,fields:PhotoFields){
 export function updateAdminPhoto(token:string,id:string,fields:PhotoFields){
  return request<AdminPhoto>('/'+encodeURIComponent(id),token,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(fields)});
 }
+export function deleteAdminPhoto(token:string,id:string){
+ return request<{deleted:boolean}>('/'+encodeURIComponent(id),token,{method:'DELETE'});
+}
 export async function withPhotoAuth<T>(operation:(token:string)=>Promise<T>):Promise<T>{
  const session=readSession();if(!session)throw new AdminPhotoError('unauthorized');
  try{return await operation(session.accessToken)}catch(err){

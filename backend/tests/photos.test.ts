@@ -107,7 +107,8 @@ describe('photo API', () => {
   it('serves public photos with generated public URLs', async () => {
     const order2 = vi.fn().mockResolvedValue({ data: [{ id: '65ae74cb-b004-414c-90bf-fecbe051e1b0', storage_path: 'photo.png' }], error: null });
     const order1 = vi.fn().mockReturnValue({ order: order2 });
-    const select = vi.fn().mockReturnValue({ order: order1 });
+    const eq = vi.fn().mockReturnValue({ order: order1 });
+    const select = vi.fn().mockReturnValue({ eq });
     const from = vi.fn().mockReturnValue({ select });
     const getPublicUrl = vi.fn().mockReturnValue({ data: { publicUrl: 'https://example.test/photo.png' } });
     const storageFrom = vi.fn().mockReturnValue({ getPublicUrl });
@@ -115,6 +116,7 @@ describe('photo API', () => {
     const app = buildApp(); apps.push(app);
     const response = await app.inject({ method: 'GET', url: '/api/photos' });
     expect(response.statusCode).toBe(200);
+    expect(eq).toHaveBeenCalledWith('active', true);
     expect(response.json()[0]).toMatchObject({ public_url: 'https://example.test/photo.png' });
   });
 });

@@ -7,7 +7,7 @@ export function carouselWindow<T>(items:T[],start:number,count:number):T[]{
  if(items.length===0)return [];
  return Array.from({length:Math.min(count,items.length)},(_,index)=>items[(start+index)%items.length]);
 }
-export function HomePhotoCarousel(){
+export function HomePhotoCarousel({showHeading=true}:{showHeading?:boolean}={}){
  const [photos,setPhotos]=useState<PublicPhoto[]>([]);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState(false);
@@ -45,8 +45,8 @@ export function HomePhotoCarousel(){
  if(!loading&&!error&&photos.length===0)return null;
  const visible=carouselWindow(photos,index,3);
  return <section aria-label="Galeria de fotos da nossa história" className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-10 sm:pb-24" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocusCapture={()=>setPaused(true)} onBlurCapture={event=>{if(!(event.relatedTarget instanceof Node)||!event.currentTarget.contains(event.relatedTarget))setPaused(false)}}>
-  <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-   <div><p className="sans text-xs uppercase tracking-[.25em] text-[#8a7457]">Nossa história em imagens</p><h2 className="mt-3 text-3xl text-[#40382e] sm:text-4xl">Nossos momentos</h2></div>
+  <div className={`mb-6 flex flex-wrap items-end gap-4 ${showHeading?'justify-between':'justify-end'}`}>
+   {showHeading&&<div><p className="sans text-xs uppercase tracking-[.25em] text-[#8a7457]">Nossa história em imagens</p><h2 className="mt-3 text-3xl text-[#40382e] sm:text-4xl">Nossos momentos</h2></div>}
    {photos.length>1&&<div className="flex items-center gap-2">
     <button type="button" onClick={previous} aria-label="Fotos anteriores" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#cdbb9f] bg-white/85 text-[#40382e] hover:bg-[#f0e9df]"><ChevronLeft size={19}/></button>
     <button type="button" onClick={next} aria-label="Próximas fotos" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#cdbb9f] bg-white/85 text-[#40382e] hover:bg-[#f0e9df]"><ChevronRight size={19}/></button>

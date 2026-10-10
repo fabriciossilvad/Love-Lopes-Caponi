@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 
 import { getEnv } from '../../../config/env.js';
+import { createSupabaseAdminClient } from '../../../config/supabase.js';
 import type { UpdatePhotoBody } from './admin-photo.schemas.js';
 
 const BUCKET = 'wedding-gallery';
@@ -73,4 +74,21 @@ export async function updateAdminPhoto(accessToken: string, photoId: string, inp
   const { data, error } = await client(accessToken).from('photos').update(patch).eq('id', photoId).select('*').maybeSingle();
   if (error) throw error;
   return data;
+}
+
+/** Remove the database record first so the photo disappears from public galleries.
+ * Storage cleanup is best-effort; a failed cleanup must not restore a broken public record.
+ */
+export async function deleteAdminPhoto(photoId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { data: photo, error: lookupError } = await supabase.from('photos')
+    .select('id, storage_path').eq('id', photoId).maybeSingle();
+  if (lookupError) throw lookupError;
+  if (!photo) return { deleted: false, storageCleaned: false };
+  const { data: deleted, error: deleteError } = await supabase.from('photos')
+    .delete().eq('id', photoId).select('id').maybeSingle();
+  if (deleteError) throw deleteError;
+  if (!deleted) return { deleted: false, storageCleaned: false };
+  const { error: storageError } = await supabase.storage.from(BUCKET).remove([photo.storage_path]);
+  return { deleted: true, storageCleaned: !storageError };
 }

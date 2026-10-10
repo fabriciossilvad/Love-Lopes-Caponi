@@ -2,7 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 
 import { requireAdmin } from '../admin-auth.js';
 import { createPhotoFieldsSchema, photoIdParamsSchema, updatePhotoBodySchema } from './admin-photo.schemas.js';
-import { createAdminPhoto, hasValidPhotoSignature, isAllowedPhotoType, listAdminPhotos, updateAdminPhoto } from './admin-photo.service.js';
+import { createAdminPhoto, deleteAdminPhoto, hasValidPhotoSignature, isAllowedPhotoType, listAdminPhotos, updateAdminPhoto } from './admin-photo.service.js';
 
 export const adminPhotoRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', requireAdmin);
@@ -68,4 +68,18 @@ export const adminPhotoRoutes: FastifyPluginAsync = async (app) => {
       return reply.status(409).send({ error: 'PHOTO_UPDATE_FAILED', message: 'Não foi possível atualizar a foto.' });
     }
   });
+  app.delete('/:photoId', async (request, reply) => {
+    const params = photoIdParamsSchema.safeParse(request.params);
+    if (!params.success) return reply.status(400).send({ error: 'INVALID_PHOTO_ID', message: 'Foto inválida.' });
+    try {
+      const result = await deleteAdminPhoto(params.data.photoId);
+      if (!result.deleted) return reply.status(404).send({ error: 'PHOTO_NOT_FOUND', message: 'Foto não encontrada.' });
+      if (!result.storageCleaned) request.log.warn({ photoId: params.data.photoId }, 'Photo deleted but storage cleanup failed');
+      return { deleted: true };
+    } catch (error) {
+      request.log.error({ err: error }, 'Admin photo deletion failed');
+      return reply.status(500).send({ error: 'PHOTO_DELETE_FAILED', message: 'Não foi possível excluir a foto.' });
+    }
+  });
+
 };

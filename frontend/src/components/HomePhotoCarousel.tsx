@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Images } from 'lucide-react';
 import { fetchPhotos, type PublicPhoto } from '../services/photos';
 
-const INTERVAL_MS=5000;
+const INTERVAL_MS=1000;
 export function carouselWindow<T>(items:T[],start:number,count:number):T[]{
  if(items.length===0)return [];
  return Array.from({length:Math.min(count,items.length)},(_,index)=>items[(start+index)%items.length]);
@@ -56,10 +56,10 @@ export function HomePhotoCarousel(){
   :error?<div role="alert" className="sans rounded-xl border border-[#e9e1d5] bg-white/80 p-5 text-sm">Não foi possível carregar as fotos. <button type="button" onClick={()=>setRevision(value=>value+1)} className="underline">Tentar novamente</button></div>
   :<><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
    {visible.map((photo,position)=><figure key={position} className={`min-w-0 overflow-hidden rounded-2xl border border-[#e9e1d5] bg-[#eee6da] shadow-sm ${position===1?'hidden sm:block':position===2?'hidden lg:block':''}`}>
-    <img key={photo.id} src={photo.public_url} alt={photo.caption||'Momento especial da nossa história'} loading={position===0?'eager':'lazy'} className="aspect-[4/5] w-full object-cover"/>
+    <img key={photo.id} src={photo.public_url} alt={photo.caption||'Momento especial da nossa história'} loading={position===0?'eager':'lazy'} className={reducedMotion?"aspect-[4/5] w-full object-cover":"carousel-photo-enter aspect-[4/5] w-full object-cover"}/>
     {photo.caption&&<figcaption className="sans bg-white/90 px-4 py-3 text-sm text-[#655d53]">{photo.caption}</figcaption>}
    </figure>)}
   </div>
-  {photos.length>1&&<p className="sans mt-4 text-center text-xs text-[#756d61]">Foto {index+1} de {photos.length} · {reducedMotion?'Use as setas para navegar':'Troca automática a cada 5 segundos'}</p>}</>}
+  {photos.length>1&&<p className="sans mt-4 text-center text-xs text-[#756d61]">Foto {index+1} de {photos.length} · {reducedMotion?'Use as setas para navegar':'Troca automática a cada 1 segundo'}</p>}</>}
  </section>;
 }

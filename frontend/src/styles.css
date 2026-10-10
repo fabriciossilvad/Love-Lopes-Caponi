@@ -28,3 +28,13 @@ h1,h2,h3,h4,h5,p{overflow-wrap:break-word}
 @media(max-width:639px){
  input,textarea,select{font-size:16px}
 }
+
+/* Gentle image entrance when the carousel advances. */
+@keyframes carousel-photo-enter{
+ from{opacity:.35;transform:translateX(12px) scale(1.015)}
+ to{opacity:1;transform:translateX(0) scale(1)}
+}
+.carousel-photo-enter{animation:carousel-photo-enter 380ms ease-out both}
+@media(prefers-reduced-motion:reduce){
+ .carousel-photo-enter{animation:none}
+}

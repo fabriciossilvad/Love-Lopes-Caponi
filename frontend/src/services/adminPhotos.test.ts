@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AdminPhotoError, createAdminPhoto, listAdminPhotos, updateAdminPhoto } from './adminPhotos';
+import { AdminPhotoError, createAdminPhoto, deleteAdminPhoto, listAdminPhotos, updateAdminPhoto } from './adminPhotos';
 afterEach(()=>vi.unstubAllGlobals());
 const fields={eventId:null,caption:'Nossa história',displayOrder:2,active:true};
 describe('admin gallery API',()=>{
@@ -24,6 +24,13 @@ describe('admin gallery API',()=>{
   await updateAdminPhoto('jwt','photo-id',{...fields,active:false});
   expect(fn.mock.calls[0][0]).toBe('/api/admin/photos/photo-id');
   expect(JSON.parse(fn.mock.calls[0][1].body).active).toBe(false);
+ });
+ it('deletes a photo using the authenticated endpoint',async()=>{
+  const fn=vi.fn().mockResolvedValue({ok:true,status:200,json:async()=>({deleted:true})});vi.stubGlobal('fetch',fn);
+  await expect(deleteAdminPhoto('jwt','photo-id')).resolves.toEqual({deleted:true});
+  expect(fn.mock.calls[0][0]).toBe('/api/admin/photos/photo-id');
+  expect(fn.mock.calls[0][1].method).toBe('DELETE');
+  expect(fn.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt');
  });
  it('rejects expired sessions',async()=>{
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:false,status:401}));

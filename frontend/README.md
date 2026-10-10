@@ -84,3 +84,12 @@ Atenção: convites novos são persistidos no Supabase conectado. Use nomes de t
 Em `/admin/convidados`, o administrador pode cadastrar convidados em convites existentes, definir pelo menos um evento, editar dados e atualizar os eventos associados. A listagem reúne convidados a partir dos detalhes de cada convite, incluindo RSVP por evento. Endpoints: `POST /api/admin/guests`, `PATCH /api/admin/guests/:guestId`, `PUT /api/admin/guests/:guestId/events`, além de listagem/detalhes de convites e listagem de eventos.
 
 **Limitações desta entrega:** a API atual não permite mudar o convite de um convidado já cadastrado nem deixar um convidado sem eventos. A edição de dados e a atualização dos vínculos são duas chamadas distintas; se a segunda falhar, a primeira poderá já estar persistida. A alteração de vínculos de eventos pode impactar respostas RSVP existentes. Faça testes com registros de teste e verifique o resultado após atualizar a página.
+
+
+## Painel administrativo — presentes e imagens
+
+Em `/admin/presentes`, é possível listar, criar e editar presentes, definir evento, descrição, valor estimado, quantidade, ordem e status. O formulário aceita imagem JPEG/PNG/WebP de até 5 MB. O upload é enviado após salvar o registro, por `POST /api/admin/gifts/:giftId/image`, e é armazenado no bucket `gift-images` do Supabase Storage. O catálogo público agora usa `image_url` retornado pela API, mantendo o ícone padrão para presentes sem imagem.
+
+Endpoints administrativos: `GET /api/admin/gifts`, `POST /api/admin/gifts`, `PATCH /api/admin/gifts/:giftId`, `POST /api/admin/gifts/:giftId/image`. A API pública `GET /api/events/:eventId/gifts?token=...` acrescenta `image_url` quando `image_path` estiver presente.
+
+**Limitações:** categorias existentes são preservadas durante a edição, mas não há seleção de categorias nesta primeira interface. A gestão detalhada de reservas ainda não foi implementada no painel. O upload não é transacional com a criação/edição: se falhar, o presente permanece salvo e a imagem pode ser reenviada pela edição. As imagens públicas exigem que o bucket `gift-images` esteja configurado para leitura pública conforme as migrations e políticas do projeto.

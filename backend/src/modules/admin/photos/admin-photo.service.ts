@@ -32,7 +32,7 @@ export async function listAdminPhotos(accessToken: string) {
     .select('id, event_id, storage_path, caption, display_order, active, created_at, updated_at, events(id, name, slug)')
     .order('display_order').order('created_at', { ascending: false });
   if (error) throw error;
-  return data;
+  return data.map((photo) => ({ ...photo, public_url: client(accessToken).storage.from(BUCKET).getPublicUrl(photo.storage_path).data.publicUrl }));
 }
 
 export async function createAdminPhoto(accessToken: string, file: Buffer, mimetype: string, fields: { eventId?: string | null | undefined; caption?: string | null | undefined; displayOrder: number; active: boolean }) {

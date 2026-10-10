@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Gift, ImagePlus, Pencil, Plus, RefreshCw, X } from 'lucide-react';
+import { ImagePlus, Pencil, Plus, RefreshCw, X } from 'lucide-react';
 import type { AdminSession } from '../services/adminAuth';
 import { listEvents, type AdminEvent, EventApiError } from '../services/adminEvents';
 import { AdminGiftError, createAdminGift, listAdminGifts, updateAdminGift, uploadGiftImage, withGiftAuth, type AdminGift, type GiftInput, type GiftStatus } from '../services/adminGifts';
@@ -58,6 +58,8 @@ export function AdminGifts({session,onExpired}:{session:AdminSession;onExpired:(
   }catch(err){handleError(err)}finally{setSaving(false)}
  }
  const sorted=[...gifts].sort((a,b)=>a.display_order-b.display_order||a.name.localeCompare(b.name,'pt-BR'));
+ const groups=events.map(event=>({event,gifts:sorted.filter(gift=>gift.event_id===event.id)}));
+ const orphaned=sorted.filter(gift=>!events.some(event=>event.id===gift.event_id));
  return <section className="sans">
   <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-widest text-[#a28b69]">Administração</p><h1 className="mt-2 font-serif text-3xl">Presentes</h1><p className="mt-2 text-sm text-[#756d61]">Organize os presentes por evento e envie imagens para o catálogo.</p></div><button disabled={loading||events.length===0} onClick={()=>open()} className="inline-flex items-center gap-2 rounded-full bg-[#40382e] px-5 py-3 text-sm text-white disabled:opacity-50"><Plus size={17}/>Novo presente</button></div>
   {feedback&&<p role="status" className="mt-5 rounded-lg bg-[#f0e9df] p-3 text-sm">{feedback}</p>}
@@ -76,8 +78,19 @@ export function AdminGifts({session,onExpired}:{session:AdminSession;onExpired:(
    <p className="mt-4 text-xs text-[#756d61]">A imagem será enviada após salvar o presente. Se o upload falhar, o presente continuará cadastrado e você poderá reenviar a imagem pela edição.</p>
    <div className="mt-6 flex flex-wrap gap-3"><button disabled={saving} className="rounded-full bg-[#40382e] px-6 py-3 text-sm text-white disabled:opacity-50">{saving?'Salvando...':'Salvar presente'}</button><button type="button" disabled={saving} onClick={()=>setEditing(undefined)} className="rounded-full border px-6 py-3 text-sm">Cancelar</button></div>
   </form>}
-  <div className="mt-7 overflow-x-auto rounded-xl border border-[#e9e1d5] bg-white">{loading?<p role="status" className="p-6 text-sm">Carregando presentes...</p>:sorted.length===0?<p className="p-6 text-sm">Nenhum presente cadastrado.</p>:<table className="w-full min-w-[780px] text-left text-sm"><thead className="border-b bg-[#fdfbf7] text-[#756d61]"><tr><th className="p-4">Presente</th><th className="p-4">Evento</th><th className="p-4">Quantidade</th><th className="p-4">Status</th><th className="p-4">Imagem</th><th className="p-4">Ação</th></tr></thead><tbody>{sorted.map(g=><tr key={g.id} className="border-b last:border-0"><td className="p-4 font-medium">{g.name}</td><td className="p-4">{g.events?.name??events.find(e=>e.id===g.event_id)?.name??'—'}</td><td className="p-4">{g.quantity}</td><td className="p-4">{g.status==='ACTIVE'?'Ativo':'Inativo'}</td><td className="p-4">{g.image_path?<span className="inline-flex items-center gap-1 text-[#477054]"><ImagePlus size={16}/>Enviada</span>:'Sem imagem'}</td><td className="p-4"><button onClick={()=>open(g)} className="inline-flex items-center gap-2 underline"><Pencil size={15}/>Editar</button></td></tr>)}</tbody></table>}</div>
+  <div className="mt-7 space-y-7">
+   {loading&&gifts.length===0?<p role="status" className="text-sm">Carregando presentes...</p>:groups.length===0&&orphaned.length===0?<p className="text-sm">Nenhum evento cadastrado.</p>:<>
+    {groups.map(({event,gifts:items})=><section key={event.id} className="overflow-hidden rounded-xl border border-[#e9e1d5] bg-white">
+     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e1d5] bg-[#fdfbf7] px-5 py-4"><h2 className="font-serif text-2xl text-[#40382e]">{event.name}</h2><span className="text-xs text-[#756d61]">{items.length} {items.length===1?'presente':'presentes'}</span></div>
+     {items.length===0?<p className="p-5 text-sm text-[#756d61]">Nenhum presente cadastrado para este evento.</p>:<div className="divide-y divide-[#eee6da]">{items.map(g=><article key={g.id} className="flex flex-wrap items-center gap-4 px-5 py-4 sm:flex-nowrap">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f0e9df]">{g.image_url?<img src={g.image_url} alt="" loading="lazy" className="h-full w-full object-cover"/>:<ImagePlus size={25} className="text-[#b19b7a]"/>}</div>
+      <div className="min-w-0 flex-1"><h3 className="font-medium text-[#40382e]">{g.name}</h3><p className="mt-1 text-xs text-[#756d61]">Quantidade: {g.quantity} · {g.status==='ACTIVE'?'Ativo':'Inativo'}{g.image_path?'':' · Sem imagem'}</p></div>
+      <button onClick={()=>open(g)} className="inline-flex min-h-11 items-center gap-2 text-sm underline"><Pencil size={15}/>Editar</button>
+     </article>)}</div>}
+    </section>)}
+    {orphaned.length>0&&<section className="rounded-xl border border-[#e9e1d5] bg-white p-5"><h2 className="font-serif text-xl">Evento indisponível</h2>{orphaned.map(g=><div key={g.id} className="mt-3 flex items-center justify-between gap-3"><span>{g.name}</span><button onClick={()=>open(g)} className="inline-flex items-center gap-2 text-sm underline"><Pencil size={15}/>Editar</button></div>)}</section>}
+   </>}
+  </div>
   <button disabled={loading} onClick={reload} className="mt-5 inline-flex items-center gap-2 text-sm underline disabled:opacity-50"><RefreshCw size={16}/>Atualizar lista</button>
-  <p className="mt-4 flex items-center gap-2 text-xs text-[#756d61]"><Gift size={15}/>As reservas existentes são protegidas por regras do backend ao editar quantidade e disponibilidade.</p>
  </section>
 }

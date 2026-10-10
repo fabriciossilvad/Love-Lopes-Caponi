@@ -93,3 +93,10 @@ Em `/admin/presentes`, é possível listar, criar e editar presentes, definir ev
 Endpoints administrativos: `GET /api/admin/gifts`, `POST /api/admin/gifts`, `PATCH /api/admin/gifts/:giftId`, `POST /api/admin/gifts/:giftId/image`. A API pública `GET /api/events/:eventId/gifts?token=...` acrescenta `image_url` quando `image_path` estiver presente.
 
 **Limitações:** categorias existentes são preservadas durante a edição, mas não há seleção de categorias nesta primeira interface. A gestão detalhada de reservas ainda não foi implementada no painel. O upload não é transacional com a criação/edição: se falhar, o presente permanece salvo e a imagem pode ser reenviada pela edição. As imagens públicas exigem que o bucket `gift-images` esteja configurado para leitura pública conforme as migrations e políticas do projeto.
+
+
+## Painel administrativo — reservas de presentes
+
+Em `/admin/reservas`, o administrador consulta reservas ativas e canceladas, filtra por status, pesquisa por presente, evento, convite ou convidado e visualiza as datas. O responsável é identificado pelo convite; o nome do convidado aparece apenas quando a reserva possui `guest_id` associado. A tela permite liberar reservas ativas mediante confirmação, usando `DELETE /api/admin/gift-reservations/:reservationId`, e atualiza a lista após a operação. A consulta utiliza `GET /api/admin/gift-reservations` e exige autenticação administrativa.
+
+A listagem não é pública e não expõe a identidade do responsável no catálogo dos convidados. Cada reserva representa uma unidade. Não há reativação de reservas canceladas pelo painel; a liberação altera o status para `CANCELLED`.

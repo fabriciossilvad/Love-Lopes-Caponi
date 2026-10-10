@@ -7,6 +7,7 @@ vi.mock('../src/modules/admin/photos/admin-photo.service.js', () => ({
   listAdminPhotos: vi.fn(),
   createAdminPhoto: vi.fn(),
   updateAdminPhoto: vi.fn(),
+  deleteAdminPhoto: vi.fn(),
 }));
 vi.mock('../src/config/supabase.js', () => ({
   createSupabaseAnonClient: vi.fn(),
@@ -16,13 +17,14 @@ vi.mock('../src/config/supabase.js', () => ({
 import { buildApp } from '../src/app.js';
 import { createSupabaseAnonClient } from '../src/config/supabase.js';
 import { getAuthenticatedAdmin } from '../src/modules/admin/admin-auth.service.js';
-import { createAdminPhoto, hasValidPhotoSignature, listAdminPhotos, updateAdminPhoto } from '../src/modules/admin/photos/admin-photo.service.js';
+import { createAdminPhoto, hasValidPhotoSignature, listAdminPhotos, updateAdminPhoto, deleteAdminPhoto } from '../src/modules/admin/photos/admin-photo.service.js';
 
 const apps: ReturnType<typeof buildApp>[] = [];
 const auth = vi.mocked(getAuthenticatedAdmin);
 const list = vi.mocked(listAdminPhotos);
 const create = vi.mocked(createAdminPhoto);
 const update = vi.mocked(updateAdminPhoto);
+const remove = vi.mocked(deleteAdminPhoto);
 const signature = vi.mocked(hasValidPhotoSignature);
 const anon = vi.mocked(createSupabaseAnonClient);
 const admin = { userId: '6ace1121-3164-4ea0-a0c4-da029e3d5898', email: 'admin@example.com', name: 'Admin', role: 'ADMIN' as const };
@@ -102,6 +104,32 @@ describe('photo API', () => {
     });
     expect(response.statusCode).toBe(200);
     expect(update).toHaveBeenCalledWith('token', '923480d4-e3b2-4bc6-9cf0-8a5f33986a2e', { active: false });
+  });
+
+  it('deletes an existing photo as admin', async () => {
+    auth.mockResolvedValue(admin);
+    remove.mockResolvedValue({ deleted: true, storageCleaned: true });
+    const app = buildApp(); apps.push(app);
+    const response = await app.inject({ method: 'DELETE', url: '/api/admin/photos/923480d4-e3b2-4bc6-9cf0-8a5f33986a2e', headers: { authorization: 'Bearer token' } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ deleted: true });
+    expect(remove).toHaveBeenCalledWith('923480d4-e3b2-4bc6-9cf0-8a5f33986a2e');
+  });
+
+  it('rejects invalid photo identifiers on delete', async () => {
+    auth.mockResolvedValue(admin);
+    const app = buildApp(); apps.push(app);
+    const response = await app.inject({ method: 'DELETE', url: '/api/admin/photos/not-a-uuid', headers: { authorization: 'Bearer token' } });
+    expect(response.statusCode).toBe(400);
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('returns not found when deleting a missing photo', async () => {
+    auth.mockResolvedValue(admin);
+    remove.mockResolvedValue({ deleted: false, storageCleaned: false });
+    const app = buildApp(); apps.push(app);
+    const response = await app.inject({ method: 'DELETE', url: '/api/admin/photos/923480d4-e3b2-4bc6-9cf0-8a5f33986a2e', headers: { authorization: 'Bearer token' } });
+    expect(response.statusCode).toBe(404);
   });
 
   it('serves public photos with generated public URLs', async () => {

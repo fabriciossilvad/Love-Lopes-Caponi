@@ -1,7 +1,32 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { ArrowRight, Heart, Mail } from 'lucide-react';
 import { InvitationPage } from './pages/InvitationPage';
 import { AdminPage } from './pages/AdminPage';
 import { useSiteContents } from './hooks/useSiteContents';
 import { contentValue } from './services/siteContents';
-function Home(){const values=useSiteContents();return <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center"><p className="sans text-xs uppercase tracking-[.3em] text-[#a28b69]">{contentValue(values,"home.eyebrow")}</p><h1 className="mt-5 text-5xl sm:text-7xl">{contentValue(values,"home.title")}</h1><p className="sans mt-6 text-sm text-[#71695e]">{contentValue(values,"home.subtitle")}</p><p className="sans mt-10 text-sm text-[#71695e]">{contentValue(values,"home.instruction")}</p></main>}
-export function App(){return <BrowserRouter><Routes><Route path="/" element={<Home/>}/><Route path="/convite/:token" element={<InvitationPage/>}/><Route path="/admin/*" element={<AdminPage/>}/><Route path="*" element={<main className="p-10"><p>Página não encontrada.</p><Link to="/" className="underline">Voltar ao início</Link></main>}/></Routes></BrowserRouter>}
+
+function Home(){
+ const values=useSiteContents();
+ return <main className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#faf8f3]">
+  <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-[#eee5d7]/70 blur-3xl"/>
+  <div aria-hidden="true" className="pointer-events-none absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-[#f2e9dc]/80 blur-3xl"/>
+  <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-7 sm:px-10">
+   <Link to="/" className="text-lg tracking-tight sm:text-xl" aria-label="Love, Lopes & Caponi, página inicial">Love, Lopes <span className="text-[#b5966c]">&amp;</span> Caponi</Link>
+   <span className="sans hidden text-xs uppercase tracking-[.25em] text-[#8e7b61] sm:block">Nossa história</span>
+  </header>
+  <section className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-5 py-16 text-center sm:px-10 sm:py-24">
+   <div className="mb-8 flex items-center gap-4 text-[#b5966c]"><span className="h-px w-12 bg-[#c7ad87]"/><Heart size={23} strokeWidth={1.25}/><span className="h-px w-12 bg-[#c7ad87]"/></div>
+   <p className="sans text-xs font-medium uppercase tracking-[.3em] text-[#8a7457]">{contentValue(values,"home.eyebrow")}</p>
+   <h1 className="mt-6 max-w-3xl text-[clamp(2.7rem,8vw,6rem)] leading-[1.08] tracking-tight text-[#40382e]">{contentValue(values,"home.title")}</h1>
+   <div className="my-9 h-px w-24 bg-[#c7ad87]"/>
+   <p className="max-w-xl text-lg leading-relaxed text-[#655d53] sm:text-xl">{contentValue(values,"home.subtitle")}</p>
+   <div className="mt-10 w-full max-w-md rounded-2xl border border-[#e9e1d5] bg-white/75 px-6 py-7 shadow-[0_16px_55px_-35px_rgba(64,56,46,.3)] sm:px-9">
+    <Mail size={22} strokeWidth={1.3} className="mx-auto text-[#aa8a60]"/>
+    <p className="sans mt-4 text-sm leading-relaxed text-[#655d53]">{contentValue(values,"home.instruction")}</p>
+    <p className="sans mt-4 inline-flex items-center justify-center gap-2 text-xs text-[#8a7457]">Seu convite é pessoal <ArrowRight size={14}/></p>
+   </div>
+  </section>
+  <footer className="relative px-5 pb-8 text-center"><p className="sans text-[11px] uppercase tracking-[.22em] text-[#8a806f]">Feito com amor · Love, Lopes &amp; Caponi</p></footer>
+ </main>;
+}
+export function App(){return <BrowserRouter><Routes><Route path="/" element={<Home/>}/><Route path="/convite/:token" element={<InvitationPage/>}/><Route path="/admin/*" element={<AdminPage/>}/><Route path="*" element={<main className="flex min-h-screen flex-col items-center justify-center gap-5 p-6 text-center"><h1 className="text-3xl">Página não encontrada</h1><Link to="/" className="sans rounded-full bg-[#40382e] px-6 py-3 text-sm text-white">Voltar ao início</Link></main>}/></Routes></BrowserRouter>}

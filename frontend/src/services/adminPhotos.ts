@@ -1,5 +1,5 @@
 import { readSession, refresh, storeSession } from './adminAuth';
-export interface AdminPhoto {id:string;event_id:string|null;storage_path:string;caption:string|null;display_order:number;active:boolean;created_at:string;updated_at:string;events?:{id:string;name:string;slug:string}|null}
+export interface AdminPhoto {id:string;event_id:string|null;storage_path:string;public_url?:string;caption:string|null;display_order:number;active:boolean;created_at:string;updated_at:string;events?:{id:string;name:string;slug:string}|null}
 export interface PhotoFields {eventId:string|null;caption:string|null;displayOrder:number;active:boolean}
 export class AdminPhotoError extends Error {constructor(public readonly kind:'unauthorized'|'invalid'|'too-large'|'type'|'network'){super(kind)}}
 async function request<T>(path:string,token:string,init?:RequestInit):Promise<T>{

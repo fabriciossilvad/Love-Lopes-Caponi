@@ -14,11 +14,11 @@ export function InvitationPage(){
  const {token}=useParams(); const [data,setData]=useState<InvitationContext|null>(null); const [error,setError]=useState<'not-found'|'network'|null>(null); const [loading,setLoading]=useState(true); const [attempt,setAttempt]=useState(0);
  useEffect(()=>{const controller=new AbortController();setLoading(true);setError(null);setData(null);if(!token){setError('not-found');setLoading(false);return()=>controller.abort()};fetchInvitation(token,controller.signal).then(setData).catch((err:unknown)=>{if(!controller.signal.aborted)setError(err instanceof InvitationError?err.kind:'network')}).finally(()=>{if(!controller.signal.aborted)setLoading(false)});return()=>controller.abort()},[token,attempt]);
  const events=new Map<string,InvitationEvent>();data?.guests.forEach(guest=>guest.events.forEach(event=>events.set(event.id,event)));
- return <main className="min-h-screen overflow-x-hidden bg-[#faf8f3] px-4 py-10 sm:px-6 sm:py-16"><div className="mx-auto w-full max-w-4xl"><header className="mb-9 text-center sm:mb-12"><Link to="/" className="sans inline-block text-xs uppercase tracking-[.2em] text-[#806b4e] underline-offset-4 hover:underline sm:tracking-[.25em]">Página inicial</Link></header>
+ return <main className="min-h-screen overflow-x-hidden bg-[#faf8f3] px-4 py-10 sm:px-6 sm:py-16"><div className="mx-auto w-full max-w-4xl"><header className="mb-9 text-center sm:mb-12"><Link to="/" className="inline-block text-lg tracking-tight text-[#40382e] sm:text-xl">Love, Lopes <span className="text-[#b5966c]">&amp;</span> Caponi</Link></header>
  <section className="mx-auto mb-8 max-w-3xl text-center sm:mb-12">
   <div className="mb-5 flex items-center justify-center gap-4 text-[#b5966c]"><span className="h-px w-12 bg-[#c7ad87]"/><Heart size={23} strokeWidth={1.25}/><span className="h-px w-12 bg-[#c7ad87]"/></div>
   <p className="sans text-xs font-medium uppercase tracking-[.3em] text-[#8a7457]">{contentValue(content,"home.eyebrow")}</p>
-  <h2 className="mt-4 text-[clamp(2.7rem,8vw,5rem)] leading-[1.08] tracking-tight text-[#40382e]">{contentValue(content,"home.title")}</h2>
+  
   <div className="mx-auto my-6 h-px w-24 bg-[#c7ad87]"/>
   <p className="mx-auto max-w-xl text-lg leading-relaxed text-[#655d53] sm:text-xl">{contentValue(content,"home.subtitle")}</p>
  </section>

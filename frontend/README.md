@@ -130,3 +130,8 @@ A identidade visual usa fundo off-white, texto escuro, dourado champagne e títu
 - Conferir o comportamento com textos longos e imagens de diferentes proporções.
 
 A revisão foi aplicada ao código; o comportamento visual precisa de homologação manual em navegadores/dispositivos reais antes da publicação.
+
+
+## Carrossel de fotos da página inicial
+
+A página inicial carrega `GET /api/photos` e exibe apenas fotos ativas e gerais (`event_id = null`); fotos associadas a eventos continuam nos respectivos convites. O carrossel mostra até três imagens no desktop, duas no tablet e uma no celular. Avança automaticamente a cada 5 segundos, com setas para navegação manual, pausa em hover/foco e respeito à preferência `prefers-reduced-motion`. Quando não existem fotos gerais, a seção não aparece. Validar com 0, 1, 2 e 4+ fotos e em larguras mobile e desktop.

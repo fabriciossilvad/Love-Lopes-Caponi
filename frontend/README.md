@@ -77,3 +77,10 @@ A associação de convidados a eventos não é feita diretamente pelo convite: a
 Endpoints utilizados: `GET /api/admin/invitations`, `GET /api/admin/invitations/:invitationId`, `POST /api/admin/invitations`, `PATCH /api/admin/invitations/:invitationId`.
 
 Atenção: convites novos são persistidos no Supabase conectado. Use nomes de teste e não compartilhe links de teste com convidados reais.
+
+
+## Painel administrativo — convidados
+
+Em `/admin/convidados`, o administrador pode cadastrar convidados em convites existentes, definir pelo menos um evento, editar dados e atualizar os eventos associados. A listagem reúne convidados a partir dos detalhes de cada convite, incluindo RSVP por evento. Endpoints: `POST /api/admin/guests`, `PATCH /api/admin/guests/:guestId`, `PUT /api/admin/guests/:guestId/events`, além de listagem/detalhes de convites e listagem de eventos.
+
+**Limitações desta entrega:** a API atual não permite mudar o convite de um convidado já cadastrado nem deixar um convidado sem eventos. A edição de dados e a atualização dos vínculos são duas chamadas distintas; se a segunda falhar, a primeira poderá já estar persistida. A alteração de vínculos de eventos pode impactar respostas RSVP existentes. Faça testes com registros de teste e verifique o resultado após atualizar a página.

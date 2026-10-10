@@ -52,7 +52,7 @@ export function GiftCatalog({token,eventId,eventName}:{token:string;eventId:stri
    {gifts.map(gift=>{
     const mine=reservations.filter(r=>r.gift_id===gift.gift_id);
     return <article key={gift.gift_id} className="rounded-xl border border-[#eee6da] bg-[#fdfbf7] p-4">
-     <div className="flex h-28 items-center justify-center rounded-lg bg-[#f0e9df]"><GiftIcon size={36} strokeWidth={1} className="text-[#b19b7a]"/></div>
+     <div className="flex h-36 items-center justify-center overflow-hidden rounded-lg bg-[#f0e9df]">{gift.image_url?<img src={gift.image_url} alt={gift.name} loading="lazy" className="h-full w-full object-cover"/>:<GiftIcon size={36} strokeWidth={1} className="text-[#b19b7a]"/>}</div>
      <h5 className="mt-4 text-lg">{gift.name}</h5>
      {gift.category_name&&<p className="sans mt-1 text-xs text-[#8c806f]">{gift.category_name}</p>}
      {gift.description&&<p className="sans mt-2 text-sm text-[#5f5b54]">{gift.description}</p>}

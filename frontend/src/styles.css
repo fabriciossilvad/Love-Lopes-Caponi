@@ -29,12 +29,14 @@ h1,h2,h3,h4,h5,p{overflow-wrap:break-word}
  input,textarea,select{font-size:16px}
 }
 
-/* Gentle image entrance when the carousel advances. */
-@keyframes carousel-photo-enter{
- from{opacity:.55;transform:translateX(6px) scale(1.008)}
- to{opacity:1;transform:translateX(0) scale(1)}
+/* Move the entire row of photo cards, rather than swapping images in place. */
+.carousel-slide-track{
+ --carousel-columns:1;
+ display:grid;
+ grid-auto-flow:column;
+ grid-auto-columns:calc((100% - (var(--carousel-columns) - 1)*16px)/var(--carousel-columns));
+ gap:16px;
+ will-change:transform;
 }
-.carousel-photo-enter{animation:carousel-photo-enter 850ms cubic-bezier(.22,1,.36,1) both}
-@media(prefers-reduced-motion:reduce){
- .carousel-photo-enter{animation:none}
-}
+@media(min-width:640px){.carousel-slide-track{--carousel-columns:2}}
+@media(min-width:1024px){.carousel-slide-track{--carousel-columns:3}}

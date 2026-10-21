@@ -76,9 +76,10 @@ export async function getAuthenticatedAdmin(accessToken: string) {
   const now = Date.now();
   if (claimsError || !claims?.sub || !expiresAt || expiresAt <= now) return null;
 
+  const userId = claims.sub;
   const key = cacheKey(accessToken);
   const cached = adminCache.get(key);
-  if (cached && cached.expiresAt > now && cached.admin.userId === claims.sub) return cached.admin;
+  if (cached && cached.expiresAt > now && cached.admin.userId === userId) return cached.admin;
   if (cached) adminCache.delete(key);
 
   const existing = inFlight.get(key);
@@ -90,12 +91,12 @@ export async function getAuthenticatedAdmin(accessToken: string) {
     const { data: admin, error: adminError } = await userClient
       .from('admin_users')
       .select('id, name, role, active')
-      .eq('id', claims.sub)
+      .eq('id', userId)
       .eq('active', true)
       .maybeSingle();
     if (adminError || !admin) return null;
     const identity: AdminIdentity = {
-      userId: claims.sub,
+      userId,
       email: typeof claims.email === 'string' ? claims.email : null,
       name: admin.name,
       role: admin.role,
